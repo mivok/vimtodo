@@ -90,9 +90,13 @@ function! ShowDueTasks(day, ...)
     endif
     exec "lw"
 endfunction
+
 " Due today
-map <leader>cd :call ShowDueTasks(0)<CR>
+command! Today :call ShowDueTasks(0)
+map <leader>cd :Today<CR>
 " Due tomorrow
-map <leader>cf :call ShowDueTasks(1)<CR>
+command! Tomorrow :call ShowDueTasks(0)
+map <leader>cf :Tomorrow<CR>
 " Due in the next week
-map <leader>cw :call ShowDueTasks(0,7)<CR>
+command! Week :call ShowDueTasks(0,7)
+map <leader>cw :Week<CR>
