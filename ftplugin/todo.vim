@@ -8,6 +8,15 @@ setlocal foldmethod=indent
 set foldtext=v:folddashes.getline(v:foldstart)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Todo entry macros
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" New todo entry - both command and abbreviation
+" TODO - make the abbreviation run 'ds' instead
+map \cn o[ ] ds 
+iab cn [ ] <C-R>=strftime("%Y-%m-%d")<CR>
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Checkboxes
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Note: These macros make use of the 'z' mark
