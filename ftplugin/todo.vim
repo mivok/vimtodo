@@ -66,3 +66,33 @@ endfunction
 
 map <leader>ct :call LoadTaskLink()<CR>
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Task searching
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! ShowDueTasks(day, ...)
+    " Based on the Todo function at
+    " http://ifacethoughts.net/2008/05/11/task-management-using-vim/
+    " Add the first day
+    let _date = strftime("%Y-%m-%d", localtime() + a:day * 86400)
+    try
+        exec "lvimgrep /{" . _date . "}/j %"
+    catch /^Vim(\a\+):E480:/
+    endtry
+    " Add any more in the day range
+    if a:0 > 0
+        for offset in range(a:day+1, a:1)
+            let _date = strftime("%Y-%m-%d", localtime() + offset * 86400)
+            try
+                exec "lvimgrepadd /{" . _date . "}/j %"
+            catch /^Vim(\a\+):E480:/
+            endtry
+        endfor
+    endif
+    exec "lw"
+endfunction
+" Due today
+map <leader>cd :call ShowDueTasks(0)<CR>
+" Due tomorrow
+map <leader>cf :call ShowDueTasks(1)<CR>
+" Due in the next week
+map <leader>cw :call ShowDueTasks(0,7)<CR>
