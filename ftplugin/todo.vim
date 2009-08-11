@@ -34,15 +34,26 @@ endfunction
 
 map <leader>cb :call InsertCheckBox()<CR>
 
+" What states a checkbox should be in
+let todo_checkbox_states={
+            \ 'X' : { 'next': " ", 'log': "CLOSED" },
+            \ ' ' : { 'next': "X", 'log': "OPENED" }
+            \ }
+let todo_checkbox_log=1
+
 " Toggle a checkbox
 function! CheckBoxToggle()
     let line=getline(".")
     let idx=match(line, "\\[[^]]\\]")
     if idx != -1
-        " Change this translation map for different checkboxes
-        let val=tr(line[idx+1], 'X ',' X')
+        let val=g:todo_checkbox_states[line[idx+1]]["next"]
         let parts=[line[0:idx],line[idx+2:]]
         call setline(".", join(parts, val))
+        if g:todo_checkbox_log == 1
+            let log=g:todo_checkbox_states[val]["log"]
+            call append(line("."), matchstr(getline("."), "\s\+")."    ".
+                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+        endif
     endif
 endfunction
 
