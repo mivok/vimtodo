@@ -10,16 +10,18 @@ if exists("b:current_syntax")
   finish
 endif
 
-" Normal todo.txt items
 syn match       todoProject     /+\S\+/
 syn match       todoContext     /\s@\S\+/
 syn match       todoPriority    /([A-Z])/
-syn match       todoDone        /^\s*\[\?[xX]\]\? .*/
+"syn match       todoDone        /^\s*\[\?[xX]\]\?\s.*/
+syn region      todoDone        start="^\z(\s*\)\[\?[xX]\]\?\s"
+                                \ end="^\%(\n*\z1\s\)\@!"
 syn match       todoDate        /\w\?{[^}]\+}[+=-]\?/
 syn match       todoDate        /\d\{4\}-\d\{2\}-\d\{2\}/
 syn match       todoTasknum     /tid\d\+/
+syn match       todoStatus      /\s=\S\+/
 
-" Extras
+
 syn match       todoURI         /\w\+:\/\/\S\+/
 syn match       todoEmail       /\S\+@\S\+\.\S\+/
 
@@ -33,6 +35,7 @@ hi def link     todoPriority    Special
 hi def link     todoDone        Comment
 hi def link     todoDate        Constant
 hi def link     todoTasknum     Number
+hi def link     todoStatus      Identifier
 
 hi def link     todoBold        PreProc
 hi def link     todoUline       PreProc
