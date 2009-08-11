@@ -51,7 +51,7 @@ function! CheckBoxToggle()
         call setline(".", join(parts, val))
         if g:todo_checkbox_log == 1
             let log=g:todo_checkbox_states[val]["log"]
-            call append(line("."), matchstr(getline("."), "\s\+")."    ".
+            call append(line("."), matchstr(getline("."), "\\s\\+")."    ".
                     \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
         endif
     endif
