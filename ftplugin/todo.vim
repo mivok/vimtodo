@@ -7,7 +7,10 @@ iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 setlocal foldmethod=indent
 setlocal foldtext=getline(v:foldstart).\"\ ...\"
 setlocal fillchars+=fold:\ 
-"hi! link Folded Normal
+" Change the color of Folds - most color schemes have a horrible background
+" making the folds stand out too much.
+" TODO - make this overridable
+hi! link Folded Delimiter
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Todo entry macros
