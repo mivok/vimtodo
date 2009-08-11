@@ -5,7 +5,9 @@ iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " Folding support
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 setlocal foldmethod=indent
-set foldtext=v:folddashes.getline(v:foldstart)
+setlocal foldtext=getline(v:foldstart).\"\ ...\"
+setlocal fillchars+=fold:\ 
+"hi! link Folded Normal
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Todo entry macros
