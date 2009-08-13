@@ -77,10 +77,30 @@ function! LoadTaskLink()
         let tid = matchstr(tid, "\\d\\+")
         let taskurl = substitute(g:todo_taskurl, "%s", tid, "")
         call system(g:todo_browser . " " . taskurl)
+        echo "Loading Task"
+    else
+        echo "No Task ID found"
     endif
 endfunction
 
 map <leader>ct :call LoadTaskLink()<CR>
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" URL opening
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Uses todo_browser
+function! LoadLink()
+    let url=matchstr(getline("."), "https\\?://\\S\\+")
+    if url != ""
+        call system(g:todo_browser . " " . url)
+        echo "Loading URL"
+    else
+        echo "No URL Found"
+    endif
+endfunction
+
+map <leader>cl :call LoadLink()<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Task searching
