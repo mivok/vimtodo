@@ -136,3 +136,6 @@ map <leader>cf :Tomorrow<CR>
 " Due in the next week
 command! Week :call ShowDueTasks(0,7)
 map <leader>cw :Week<CR>
+" Due in the past week
+command! Overdue :call ShowDueTasks(-7,-1)
+map <leader>cx :Overdue<CR>
