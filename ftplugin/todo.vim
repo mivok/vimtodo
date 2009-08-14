@@ -1,4 +1,8 @@
 " todo.txt plugin
+
+" Default variables
+let todo_states = [["TODO", "DONE"]]
+let todo_colors = { "TODO" : "Yellow", "DONE": "Green" }
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -61,6 +65,18 @@ function! CheckBoxToggle()
 endfunction
 
 map <leader>cc :call CheckBoxToggle()<CR>
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Task status
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! HighlightStatus(name, color)
+    " Sets the highlight for a particular status to the given color
+    let name=toupper(a:name)
+    exe "syn match todoLog".name." /\\(^\\s*\\)\\@<=".name.":/"
+    exe "hi def todoLog".name." guifg=".a:color." ctermfg=".a:color.
+        \" gui=bold cterm=bold"
+endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Task link

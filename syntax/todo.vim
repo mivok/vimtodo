@@ -30,8 +30,6 @@ syn match       todoBold        /\*[^*]\+\*/
 syn match       todoUline       /_[^_]\{2,}_/
 syn match       todoComment     /\s*#.*$/
 syn match       todoLog         /\(^\s*\)\@<=[A-Z]\+:/
-syn match       todoLogOpened   /\(^\s*\)\@<=OPENED:/
-syn match       todoLogClosed   /\(^\s*\)\@<=CLOSED:/
 
 hi def link     todoProject     Statement
 hi def link     todoContext     Identifier
@@ -44,10 +42,7 @@ hi def link     todoStatus      Identifier
 hi def link     todoBold        PreProc
 hi def link     todoUline       PreProc
 hi def link     todoComment     Comment
-
 hi def link     todoLog         PreProc
-hi def          todoLogOpened   guifg=Green ctermfg=Green gui=bold cterm=bold
-hi def          todoLogClosed   guifg=Red ctermfg=Red gui=bold cterm=bold
 
 hi def link     todoURI         String
 hi def link     todoEmail       String
