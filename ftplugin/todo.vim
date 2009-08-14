@@ -2,10 +2,9 @@
 
 " Default variables
 let todo_states = [["TODO", "DONE"]]
-let todo_colors = { "TODO" : "Yellow", "DONE": "Green" }
+let todo_state_colors = { "TODO" : "Yellow", "DONE": "Green" }
 let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
-
-iab ds <C-R>=strftime("%Y-%m-%d")<CR>
+let todo_log = 1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding support
@@ -22,9 +21,11 @@ hi! link Folded Delimiter
 """ Todo entry macros
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Datestamp
+iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " New todo entry - both command and abbreviation
-" TODO - make the abbreviation run 'ds' instead
 map \cn o[ ] ds 
+" TODO - make the abbreviation run 'ds' instead
 iab cn [ ] <C-R>=strftime("%Y-%m-%d")<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -79,13 +80,38 @@ map <leader>cc :call CheckBoxToggle()<CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Task status
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! HighlightStatus(name, color)
-    " Sets the highlight for a particular status to the given color
-    let name=toupper(a:name)
-    exe "syn match todoLog".name." /\\(^\\s*\\)\\@<=".name.":/"
-    exe "hi def todoLog".name." guifg=".a:color." ctermfg=".a:color.
-        \" gui=bold cterm=bold"
+function! NextTaskState()
+    let line=getline(".")
+    let idx=match(line, "\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@=")
+    if idx != -1
+        for group in g:todo_states
+            let stateidx = 0
+            while stateidx < len(group)
+                let oldstate = group[stateidx]
+                if oldstate == line[idx+0:idx+len(oldstate)-1]
+                    let stateidx=stateidx + 1
+                    if stateidx >= len(group)
+                        let stateidx = 0
+                    endif
+                    let val=group[stateidx]
+                    let parts=[line[0:idx-1],line[idx+len(oldstate):]]
+                    call setline(".", join(parts, val))
+                    " Logging code - not used in checkboxes
+                    if g:todo_log == 1
+                        let log=group[stateidx] " TODO allow alternate log msg
+                        call append(line("."),
+                                    \ matchstr(getline("."), "\\s\\+")."    ".
+                                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+                    endif
+                    return
+                endif
+                let stateidx=stateidx + 1
+            endwhile
+        endfor
+    endif
 endfunction
+
+map <leader>cs :call NextTaskState()<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Task link
