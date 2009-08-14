@@ -3,7 +3,7 @@
 " Default variables
 let todo_states = [["TODO", "DONE"]]
 let todo_colors = { "TODO" : "Yellow", "DONE": "Green" }
-let todo_checkbox_states=[[" ", "X"], ["+", "-", "."]]
+let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
 
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 
