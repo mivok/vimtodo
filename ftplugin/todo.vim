@@ -156,7 +156,7 @@ endfunction
 command! Today :call ShowDueTasks(0)
 map <leader>cd :Today<CR>
 " Due tomorrow
-command! Tomorrow :call ShowDueTasks(0)
+command! Tomorrow :call ShowDueTasks(1)
 map <leader>cf :Tomorrow<CR>
 " Due in the next week
 command! Week :call ShowDueTasks(0,7)
