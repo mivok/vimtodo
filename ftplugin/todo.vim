@@ -3,6 +3,8 @@
 " Default variables
 let todo_states = [["TODO", "DONE"]]
 let todo_colors = { "TODO" : "Yellow", "DONE": "Green" }
+let todo_checkbox_states=[[" ", "X"], ["+", "-", "."]]
+
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -41,26 +43,33 @@ endfunction
 
 map <leader>cb :call InsertCheckBox()<CR>
 
-" What states a checkbox should be in
-let todo_checkbox_states={
-            \ 'X' : { 'next': " ", 'log': "CLOSED" },
-            \ ' ' : { 'next': "X", 'log': "OPENED" }
-            \ }
-let todo_checkbox_log=1
-
 " Toggle a checkbox
 function! CheckBoxToggle()
     let line=getline(".")
     let idx=match(line, "\\[[^]]\\]")
     if idx != -1
-        let val=g:todo_checkbox_states[line[idx+1]]["next"]
-        let parts=[line[0:idx],line[idx+2:]]
-        call setline(".", join(parts, val))
-        if g:todo_checkbox_log == 1
-            let log=g:todo_checkbox_states[val]["log"]
-            call append(line("."), matchstr(getline("."), "\\s\\+")."    ".
-                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
-        endif
+        for group in g:todo_checkbox_states
+            let stateidx = 0
+            while stateidx < len(group)
+                if group[stateidx] == line[idx+1]
+                    let stateidx=stateidx + 1
+                    if stateidx >= len(group)
+                        let stateidx = 0
+                    endif
+                    let val=group[stateidx]
+                    let parts=[line[0:idx],line[idx+2:]]
+                    call setline(".", join(parts, val))
+                    " Logging code - not used in checkboxes
+                    "if g:todo_checkbox_log == 1
+                    "    let log=g:todo_checkbox_states[val]["log"]
+                    "    call append(line("."), matchstr(getline("."), "\\s\\+")."    ".
+                    "            \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+                    "endif
+                    return
+                endif
+                let stateidx=stateidx + 1
+            endwhile
+        endfor
     endif
 endfunction
 
