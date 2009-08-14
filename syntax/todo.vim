@@ -20,8 +20,6 @@ syn region      todoDone        start="^\z(\s*\)\[\?[xX]\]\?\s"
 syn match       todoDate        /\w\?{[^}]\+}[+=-]\?/
 syn match       todoDate        /\d\{4\}-\d\{2\}-\d\{2\}/
 syn match       todoTasknum     /tid\d\+/
-syn match       todoStatus      /\s=\S\+/
-
 
 syn match       todoURI         /\w\+:\/\/\S\+/
 syn match       todoEmail       /\S\+@\S\+\.\S\+/
@@ -37,7 +35,6 @@ hi def link     todoPriority    Special
 hi def link     todoDone        Comment
 hi def link     todoDate        Constant
 hi def link     todoTasknum     Number
-hi def link     todoStatus      Identifier
 
 hi def link     todoBold        PreProc
 hi def link     todoUline       PreProc
