@@ -1,8 +1,23 @@
-" todo.txt plugin
+" Vim filetype plugin for heirarchical TODO lists
+" Maintainer:   Mark Harrison <mark@mivok.net>
+" Last Change:  Aug 15, 2009
+" License:      ISC - See LICENSE file for details
+
+" Only load if we haven't already
+if exists("b:did_ftplugin")
+    finish
+endif
+let b:did_ftplugin = 1
+
+" Make sure we aren't running in compatible mode
+let s:save_cpo = &cpo
+set cpo&vim
 
 " Default variables
 let todo_states = [["TODO", "DONE"]]
-let todo_state_colors = { "TODO" : "Yellow", "DONE": "Green" }
+" let todo_states = [["TODO", "|", "DONE", "CANCELLED"],
+"   ["WAITING", "CLOSED"]]
+let todo_state_colors = { "TODO" : "Blue", "DONE": "Green" }
 let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
 let todo_log = 1
 
@@ -12,10 +27,6 @@ let todo_log = 1
 setlocal foldmethod=indent
 setlocal foldtext=getline(v:foldstart).\"\ ...\"
 setlocal fillchars+=fold:\ 
-" Change the color of Folds - most color schemes have a horrible background
-" making the folds stand out too much.
-" TODO - make this overridable
-hi! link Folded Delimiter
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Todo entry macros
@@ -36,16 +47,25 @@ iab cn [ ] <C-R>=strftime("%Y-%m-%d")<CR>
 
 " Make a checkbox at the beginning of the line, removes any preceding bullet
 " point dash
-function! InsertCheckBox()
+if !exists("*s:InsertCheckbox")
+function! s:InsertCheckbox()
+    echo "Insert checkbox"
     let oldpos=getpos(".")
     s/^\(\s*\)\?\(- \)\?/\1[ ] /
     call setpos(".", oldpos)
 endfunction
+endif
 
-map <leader>cb :call InsertCheckBox()<CR>
+if !hasmapto('<Plug>TodoInsertCheckbox')
+    map <buffer> <unique> <LocalLeader>cb <Plug>TodoInsertCheckbox
+endif
+noremap <unique> <script> <Plug>TodoInsertCheckbox <SID>InsertCheckbox
+noremap <SID>InsertCheckbox :call <SID>InsertCheckbox()<CR>
 
 " Toggle a checkbox
-function! CheckBoxToggle()
+if !exists("*s:CheckboxToggle")
+function s:CheckboxToggle()
+    echo "Toggle checkbox"
     let line=getline(".")
     let idx=match(line, "\\[[^]]\\]")
     if idx != -1
@@ -73,14 +93,21 @@ function! CheckBoxToggle()
         endfor
     endif
 endfunction
+endif
 
-map <leader>cc :call CheckBoxToggle()<CR>
+if !hasmapto('<Plug>TodoCheckboxToggle')
+    map <buffer> <unique> <LocalLeader>cc <Plug>TodoCheckboxToggle
+endif
+noremap <unique> <script> <Plug>TodoCheckboxToggle <SID>CheckboxToggle
+noremap <SID>CheckboxToggle :call <SID>CheckboxToggle()<CR>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Task status
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! NextTaskState()
+if !exists("*s:NextTaskState")
+function s:NextTaskState()
+    echo "Next task state"
     let line=getline(".")
     let idx=match(line, "\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@=")
     if idx != -1
@@ -89,12 +116,17 @@ function! NextTaskState()
             while stateidx < len(group)
                 let oldstate = group[stateidx]
                 if oldstate == line[idx+0:idx+len(oldstate)-1]
-                    let stateidx=stateidx + 1
-                    if stateidx >= len(group)
-                        let stateidx = 0
+                    let stateidx=(stateidx + 1) % len(group)
+                    " Skip | separator
+                    if group[stateidx] == "|"
+                        let stateidx=(stateidx + 1) % len(group)
                     endif
                     let val=group[stateidx]
-                    let parts=[line[0:idx-1],line[idx+len(oldstate):]]
+                    if idx > 0
+                        let parts=[line[0:idx-1],line[idx+len(oldstate):]]
+                    else
+                        let parts=["",line[len(oldstate):]]
+                    endif
                     call setline(".", join(parts, val))
                     " Logging code - not used in checkboxes
                     if g:todo_log == 1
@@ -110,8 +142,13 @@ function! NextTaskState()
         endfor
     endif
 endfunction
+endif
 
-map <leader>cs :call NextTaskState()<CR>
+if !hasmapto('<Plug>TodoNextTaskState')
+    map <buffer> <unique> <LocalLeader>cs <Plug>TodoNextTaskState
+endif
+noremap <unique> <script> <Plug>TodoNextTaskState <SID>NextTaskState
+noremap <SID>NextTaskState :call <SID>NextTaskState()<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Task link
@@ -122,7 +159,8 @@ map <leader>cs :call NextTaskState()<CR>
 " let todo_browser="gnome-open"
 " let todo_taskurl="http://www.example.com/tasks/?id=%s"
 " (The %s will be replaced with the task id)
-function! LoadTaskLink()
+if !exists("*s:LoadTaskLink")
+function s:LoadTaskLink()
     let tid=matchstr(getline("."), "tid\\d\\+")
     if tid != ""
         let tid = matchstr(tid, "\\d\\+")
@@ -133,15 +171,21 @@ function! LoadTaskLink()
         echo "No Task ID found"
     endif
 endfunction
+endif
 
-map <leader>ct :call LoadTaskLink()<CR>
+if !hasmapto('<Plug>TodoLoadTaskLink')
+    map <buffer> <unique> <LocalLeader>ct <Plug>TodoLoadTaskLink
+endif
+noremap <unique> <script> <Plug>TodoLoadTaskLink <SID>LoadTaskLink
+noremap <SID>LoadTaskLink :call <SID>LoadTaskLink()<CR>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " URL opening
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Uses todo_browser
-function! LoadLink()
+if !exists("*s:LoadLink")
+function s:LoadLink()
     let url=matchstr(getline("."), "https\\?://\\S\\+")
     if url != ""
         call system(g:todo_browser . " " . url)
@@ -150,13 +194,19 @@ function! LoadLink()
         echo "No URL Found"
     endif
 endfunction
+endif
 
-map <leader>cl :call LoadLink()<CR>
+if !hasmapto('<Plug>TodoLoadLink')
+    map <buffer> <unique> <LocalLeader>cl <Plug>TodoLoadLink
+endif
+noremap <unique> <script> <Plug>TodoLoadLink <SID>LoadLink
+noremap <SID>LoadLink :call <SID>LoadLink()<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Task searching
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function! ShowDueTasks(day, ...)
+if !exists("*s:ShowDueTasks")
+function s:ShowDueTasks(day, ...)
     " Based on the Todo function at
     " http://ifacethoughts.net/2008/05/11/task-management-using-vim/
     " Add the first day
@@ -177,16 +227,25 @@ function! ShowDueTasks(day, ...)
     endif
     exec "lw"
 endfunction
+endif
 
-" Due today
-command! Today :call ShowDueTasks(0)
-map <leader>cd :Today<CR>
-" Due tomorrow
-command! Tomorrow :call ShowDueTasks(1)
-map <leader>cf :Tomorrow<CR>
-" Due in the next week
-command! Week :call ShowDueTasks(0,7)
-map <leader>cw :Week<CR>
-" Due in the past week
-command! Overdue :call ShowDueTasks(-7,-1)
-map <leader>cx :Overdue<CR>
+command -buffer Today :call s:ShowDueTasks(0)
+command -buffer Tomorrow :call s:ShowDueTasks(1)
+command -buffer Week :call s:ShowDueTasks(0,7)
+command -buffer Overdue :call s:ShowDueTasks(-7,-1)
+
+if !hasmapto(':Today')
+    map <buffer> <unique> <LocalLeader>cd :Today<CR>
+endif
+if !hasmapto(':Tomorrow')
+    map <buffer> <unique> <LocalLeader>cf :Tomorrow<CR>
+endif
+if !hasmapto(':Week')
+    map <buffer> <unique> <LocalLeader>cw :Week<CR>
+endif
+if !hasmapto(':Overdue')
+    map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
+endif
+
+" Restore the old compatible mode setting
+let &cpo = s:save_cpo

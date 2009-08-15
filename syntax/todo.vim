@@ -1,7 +1,7 @@
 " Vim syntax file
-" Language:     todo.txt
 " Maintainer:   Mark Harrison <mark@mivok.net>
-" Last Change:  Aug 9, 2009
+" Last Change:  Aug 15, 2009
+" License:      ISC - See LICENSE file for details
 
 " au BufRead,BufNewFile todo.txt,*.todo.txt,recur.txt,*.todo set filetype=todo
 
@@ -14,9 +14,7 @@ syn match       todoProject     /+\S\+/
 syn match       todoContext     /\s@\S\+/
 syn match       todoPriority    /([A-Z])/
 "syn match       todoDone        /^\s*\[\?[xX]\]\?\s.*/
-syn region      todoDone        start="^\z(\s*\)DONE\s"
-                                \ end="^\%(\n*\z1\s\)\@!"
-                                \ contains=todoLog
+
 syn match       todoDate        /\w\?{[^}]\+}[+=-]\?/
 syn match       todoDate        /\d\{4\}-\d\{2\}-\d\{2\}/
 syn match       todoTasknum     /tid\d\+/
@@ -45,16 +43,33 @@ hi def link     todoURI         String
 hi def link     todoEmail       String
 
 " Highlight state colors
-function! HighlightStatus(name, color)
+function s:HighlightStatus(name, color)
     " Sets the highlight for a particular status to the given color
     let name=toupper(a:name)
     exe "syn match todoState".name." /\\(^\\s*\\)\\@<=".name.
-        \":\\?\\(\\s\\|$\\)\\@=/"
+        \":\\?\\(\\s\\|$\\)\\@=/ contains=todoDone"
     exe "hi def todoState".name." guifg=".a:color." ctermfg=".a:color.
         \" gui=bold cterm=bold"
 endfunction
 for state in keys(g:todo_state_colors)
-    call HighlightStatus(state, g:todo_state_colors[state])
+    call s:HighlightStatus(state, g:todo_state_colors[state])
 endfor
+
+" Might want to make this dynamic so we can add 'contains=todoLogDONE' etc.
+function s:HighlightDone()
+    for group in g:todo_states
+        let idx = index(group, "|")
+        if idx != -1
+            let idx = idx + 1
+        elseif idx == len(group)
+            continue
+        endif
+        let match = join(group[idx+0:], "\\|")
+        exec "syn region todoDone start=\"^\\z(\\s*\\)\\%(".match."\\)\\s\"".
+            \" end=\"^\\%(\\n*\\z1\\s\\)\\@!\"".
+            \" contains=todoLog"
+    endfor
+endfunction
+call s:HighlightDone()
 
 let b:current_syntax = "todo"
