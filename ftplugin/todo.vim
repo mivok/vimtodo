@@ -14,9 +14,8 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " Default variables
-let todo_states = [["TODO", "DONE"]]
-" let todo_states = [["TODO", "|", "DONE", "CANCELLED"],
-"   ["WAITING", "CLOSED"]]
+"let todo_states = [["TODO", "DONE"]]
+ let todo_states = [["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]]
 let todo_state_colors = { "TODO" : "Blue", "DONE": "Green" }
 let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
 let todo_log = 1
@@ -108,33 +107,20 @@ noremap <SID>CheckboxToggle :call <SID>CheckboxToggle()<CR>
 if !exists("*s:NextTaskState")
 function s:NextTaskState()
     echo "Next task state"
-    let line=getline(".")
-    let idx=match(line, "\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@=")
+    let [oldstate, idx] = s:GetState()
     if idx != -1
         for group in g:todo_states
             let stateidx = 0
             while stateidx < len(group)
-                let oldstate = group[stateidx]
-                if oldstate == line[idx+0:idx+len(oldstate)-1]
+                let teststate = s:ParseTaskState(group[stateidx])["state"]
+                if teststate == oldstate
                     let stateidx=(stateidx + 1) % len(group)
                     " Skip | separator
                     if group[stateidx] == "|"
                         let stateidx=(stateidx + 1) % len(group)
                     endif
-                    let val=group[stateidx]
-                    if idx > 0
-                        let parts=[line[0:idx-1],line[idx+len(oldstate):]]
-                    else
-                        let parts=["",line[len(oldstate):]]
-                    endif
-                    call setline(".", join(parts, val))
-                    " Logging code - not used in checkboxes
-                    if g:todo_log == 1
-                        let log=group[stateidx] " TODO allow alternate log msg
-                        call append(line("."),
-                                    \ matchstr(getline("."), "\\s\\+")."    ".
-                                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
-                    endif
+                    let val=s:ParseTaskState(group[stateidx])["state"]
+                    call s:SetTaskState(val, oldstate, idx)
                     return
                 endif
                 let stateidx=stateidx + 1
@@ -149,6 +135,80 @@ if !hasmapto('<Plug>TodoNextTaskState')
 endif
 noremap <unique> <script> <Plug>TodoNextTaskState <SID>NextTaskState
 noremap <SID>NextTaskState :call <SID>NextTaskState()<CR>
+
+" Parse a task state of the form TODO(s) into a state and shortcut
+function s:ParseTaskState(state)
+    let state=matchstr(a:state, '^[A-Z]\+')
+    let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
+    return { "state": state, "key": key }
+endfunction
+
+function s:PromptTaskState()
+    let [oldstate, idx] = s:GetState()
+    if idx != -1
+        echo "Pick the new task state"
+        let statekeys = {}
+        for group in g:todo_states
+            let promptlist = []
+            for statestr in group
+                if statestr == "|"
+                    continue
+                endif
+                let state = s:ParseTaskState(statestr)
+                if state["key"] != ""
+                    call add(promptlist, state["state"]." (".state["key"].")")
+                    let statekeys[state["key"]] = state["state"]
+                endif
+            endfor
+            if len(promptlist)
+                echo "    ".join(promptlist, ", ")
+            endif
+        endfor
+        echo
+        let responsestr=""
+        echo "or press Enter to Quit"
+        while !has_key(statekeys, responsestr)
+            let response=getchar()
+            if response == 13
+                return
+            endif
+            let responsestr=nr2char(response)
+        endwhile
+        call s:SetTaskState(statekeys[responsestr], oldstate, idx)
+    endif
+endfunction
+
+if !hasmapto('<Plug>TodoPromptTaskState')
+    map <buffer> <unique> <LocalLeader>cv <Plug>TodoPromptTaskState
+endif
+noremap <unique> <script> <Plug>TodoPromptTaskState <SID>PromptTaskState
+noremap <SID>PromptTaskState :call <SID>PromptTaskState()<CR>
+
+function s:SetTaskState(state, oldstate, idx)
+    let line = getline(".")
+    if a:idx > 0
+        let parts=[line[0:a:idx-1],line[a:idx+len(a:oldstate):]]
+    else
+        let parts=["",line[len(a:oldstate):]]
+    endif
+    call setline(".", join(parts, a:state))
+    " Logging code
+    if g:todo_log == 1
+        let log=a:state " TODO allow alternate log msg
+        call append(line("."),
+                    \ matchstr(getline("."), "^\\s\\+")."    ".
+                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+    endif
+endfunction
+
+" Gets the state on the current line, and the index of it
+function s:GetState()
+    let line=getline(".")
+    let regex="\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@="
+    let idx=match(line, regex)
+    let state=matchstr(line, regex)
+    return [state, idx]
+endfunction
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Task link
