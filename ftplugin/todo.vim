@@ -307,5 +307,28 @@ if !hasmapto(':Overdue')
     map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
 endif
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Create a new buffer
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function s:NewScratchBuffer(name)
+    " Set the buffer name
+    let name="[".a:name."]"
+    if !has("win32")
+        let name = escape(name, "[]")
+    endif
+    " Switch buffers
+    if has("gui")
+        exec "drop" name
+    else
+        exec "hide edit" name
+    endif
+    " Set the new buffer properties to be a scrach buffer
+    setlocal bufhidden=delete
+    setlocal buftype=nofile
+    setlocal modifiable " This needs to be changed once the buffer has stuff in
+    setlocal noswapfile
+    setlocal nowrap     " This can be changed if needed
+endfunction
+
 " Restore the old compatible mode setting
 let &cpo = s:save_cpo
