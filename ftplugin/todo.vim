@@ -15,7 +15,7 @@ set cpo&vim
 
 " Default variables
 "let todo_states = [["TODO", "DONE"]]
- let todo_states = [["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]]
+let todo_states = [["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]]
 let todo_state_colors = { "TODO" : "Blue", "DONE": "Green" }
 let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
 let todo_log = 1
@@ -112,14 +112,14 @@ function s:NextTaskState()
         for group in g:todo_states
             let stateidx = 0
             while stateidx < len(group)
-                let teststate = s:ParseTaskState(group[stateidx])["state"]
+                let teststate = TodoParseTaskState(group[stateidx])["state"]
                 if teststate == oldstate
                     let stateidx=(stateidx + 1) % len(group)
                     " Skip | separator
                     if group[stateidx] == "|"
                         let stateidx=(stateidx + 1) % len(group)
                     endif
-                    let val=s:ParseTaskState(group[stateidx])["state"]
+                    let val=TodoParseTaskState(group[stateidx])["state"]
                     call s:SetTaskState(val, oldstate, idx)
                     return
                 endif
@@ -137,7 +137,7 @@ noremap <unique> <script> <Plug>TodoNextTaskState <SID>NextTaskState
 noremap <SID>NextTaskState :call <SID>NextTaskState()<CR>
 
 " Parse a task state of the form TODO(s) into a state and shortcut
-function s:ParseTaskState(state)
+function TodoParseTaskState(state)
     let state=matchstr(a:state, '^[A-Z]\+')
     let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
     return { "state": state, "key": key }
@@ -145,37 +145,36 @@ endfunction
 
 function s:PromptTaskState()
     let [oldstate, idx] = s:GetState()
-    if idx != -1
-        echo "Pick the new task state"
-        let statekeys = {}
-        for group in g:todo_states
-            let promptlist = []
-            for statestr in group
-                if statestr == "|"
-                    continue
-                endif
-                let state = s:ParseTaskState(statestr)
-                if state["key"] != ""
-                    call add(promptlist, state["state"]." (".state["key"].")")
-                    let statekeys[state["key"]] = state["state"]
-                endif
-            endfor
-            if len(promptlist)
-                echo "    ".join(promptlist, ", ")
+    call s:NewScratchBuffer("StateSelect")
+    call append(0, "Pick the new task state")
+    let statekeys = {}
+    for group in g:todo_states
+        let promptlist = []
+        for statestr in group
+            if statestr == "|"
+                continue
+            endif
+            let state = TodoParseTaskState(statestr)
+            if state["key"] != ""
+                call add(promptlist, state["state"]." (".state["key"].")")
+                let statekeys[state["key"]] = state["state"]
             endif
         endfor
-        echo
-        let responsestr=""
-        echo "or press Enter to Quit"
-        while !has_key(statekeys, responsestr)
-            let response=getchar()
-            if response == 13
-                return
-            endif
-            let responsestr=nr2char(response)
-        endwhile
-        call s:SetTaskState(statekeys[responsestr], oldstate, idx)
-    endif
+        if len(promptlist)
+            call append(line("$"), "    ".join(promptlist, ", "))
+        endif
+    endfor
+    echo
+    for key in keys(statekeys)
+        exe "nnoremap <buffer> <silent> ".key.
+                    \" :call <SID>SelectTaskState(\"".statekeys[key]."\"".
+                    \",\"".oldstate."\",".idx.")<CR>"
+    endfor
+endfunction
+
+function s:SelectTaskState(state, oldstate, idx)
+    bdelete
+    call s:SetTaskState(a:state, a:oldstate, a:idx)
 endfunction
 
 if !hasmapto('<Plug>TodoPromptTaskState')
