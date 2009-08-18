@@ -13,12 +13,23 @@ let b:did_ftplugin = 1
 let s:save_cpo = &cpo
 set cpo&vim
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Setup script variables
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function s:Set(varname, value)
+    if !exists(a:varname)
+        exec "let" a:varname "=" string(a:value)
+    endif
+endfunction
+
 " Default variables
 "let todo_states = [["TODO", "DONE"]]
-let todo_states = [["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]]
-let todo_state_colors = { "TODO" : "Blue", "DONE": "Green" }
-let todo_checkbox_states=[[" ", "X"], ["+", "-", "."], ["Y", "N", "?"]]
-let todo_log = 1
+call s:Set("g:todo_states",
+    \[["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]])
+call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green" })
+call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
+    \["Y", "N", "?"]])
+call s:Set("g:todo_log", 1)
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding support
