@@ -31,6 +31,7 @@ call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green",
 call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
     \["Y", "N", "?"]])
 call s:Set("g:todo_log", 1)
+call s:Set("g:todo_log_drawer", "LOGBOOK")
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Folding support
@@ -217,11 +218,15 @@ function s:SetTaskState(state, oldstate, idx)
         call setline(".", join(parts, "")[1:])
     endif
     " Logging code
+    " TODO - separate logging of all state changes from logging open/closed
+    " Only log all state changes to the drawer
+    " Others go on the first line
     if g:todo_log == 1
-        let log=a:state " TODO allow alternate log msg
+        let log=a:state
         if log != "" " Don't log removing a state
-            call append(line("."),
-                        \ matchstr(getline("."), "^\\s\\+")."    ".
+            let drawerline = s:FindOrMakeDrawer(g:todo_log_drawer)
+            call append(drawerline,
+                        \ matchstr(getline(drawerline), "^\\s\\+")."    ".
                         \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
         endif
     endif
@@ -357,6 +362,39 @@ function s:NewScratchBuffer(name, split)
     setlocal modifiable " This needs to be changed once the buffer has stuff in
     setlocal noswapfile
     setlocal nowrap     " This can be changed if needed
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Drawer functionality
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function s:FindDrawer(name)
+    let line = line(".")
+    let topindent = indent(line)
+    let line=line + 1
+    let indent = indent(line)
+    while indent(line) > topindent
+        if indent(line) == indent &&
+                    \ match(getline(line), '^\s\+:'.toupper(a:name).':') != -1
+            return line
+        endif
+        let line = line + 1
+    endwhile
+    return -1
+endfunction
+
+function s:FindOrMakeDrawer(name)
+    let line = s:FindDrawer(a:name)
+    if line != -1
+        return line
+    endif
+    let topindent = indent(".")
+    let indent = indent(line(".") + 1)
+    if indent <= topindent
+        let indent = topindent + 4 " TODO - set this to shiftwidth
+    endif
+    let indentstr=printf("%".indent."s", "") " generate indent spaces
+    call append(line("."), indentstr.":".toupper(a:name).":")
+    return line(".")+1
 endfunction
 
 " Restore the old compatible mode setting
