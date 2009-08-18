@@ -64,7 +64,11 @@ function s:HighlightDone()
         elseif idx == len(group)
             continue
         endif
-        let match = join(group[idx+0:], "\\|")
+        let parsed = []
+        for state in group[idx+0:]
+            call add(parsed, TodoParseTaskState(state)["state"])
+        endfor
+        let match = join(parsed, "\\|")
         exec "syn region todoDone start=\"^\\z(\\s*\\)\\%(".match."\\)\\s\"".
             \" end=\"^\\%(\\n*\\z1\\s\\)\\@!\"".
             \" contains=todoLog"
