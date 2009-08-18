@@ -26,6 +26,7 @@ syn match       todoBold        /\*[^*]\+\*/
 syn match       todoUline       /_[^_]\{2,}_/
 syn match       todoComment     /\s*#.*$/
 syn match       todoLog         /\(^\s*\)\@<=[A-Z]\+:/
+syn match       todoDrawer      /\(^\s*\)\@<=:[A-Z]\+:/
 
 hi def link     todoProject     Statement
 hi def link     todoContext     Identifier
@@ -38,6 +39,7 @@ hi def link     todoBold        PreProc
 hi def link     todoUline       PreProc
 hi def link     todoComment     Comment
 hi def link     todoLog         PreProc
+hi def link     todoDrawer      Type
 
 hi def link     todoURI         String
 hi def link     todoEmail       String
