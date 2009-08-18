@@ -26,7 +26,8 @@ endfunction
 "let todo_states = [["TODO", "DONE"]]
 call s:Set("g:todo_states",
     \[["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]])
-call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green" })
+call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green",
+    \ "CANCELLED" : "Red", "WAITING": "Yellow", "CLOSED": "Grey" })
 call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
     \["Y", "N", "?"]])
 call s:Set("g:todo_log", 1)
@@ -156,7 +157,7 @@ endfunction
 
 function s:PromptTaskState()
     let [oldstate, idx] = s:GetState()
-    call s:NewScratchBuffer("StateSelect")
+    call s:NewScratchBuffer("StateSelect", 1)
     call append(0, "Pick the new task state")
     let statekeys = {}
     for group in g:todo_states
@@ -181,9 +182,12 @@ function s:PromptTaskState()
                     \" :call <SID>SelectTaskState(\"".statekeys[key]."\"".
                     \",\"".oldstate."\",".idx.")<CR>"
     endfor
-    call append(line("$"), "    Press SPACE to remove any existing state")
+    call append(line("$"), "    Press Space to remove any existing state")
     exe "nnoremap <buffer> <silent> <Space> :call <SID>SelectTaskState(".
                 \'"","'.oldstate.'", '.idx.')<CR>'
+    call append(line("$"), "    Press Escape to cancel")
+    nnoremap <buffer> <silent> <Esc> :bd<CR>
+    setlocal nomodifiable " Make the buffer read only
 endfunction
 
 function s:SelectTaskState(state, oldstate, idx)
@@ -332,7 +336,10 @@ endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Create a new buffer
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function s:NewScratchBuffer(name)
+function s:NewScratchBuffer(name, split)
+    if a:split
+        split
+    endif
     " Set the buffer name
     let name="[".a:name."]"
     if !has("win32")
@@ -340,9 +347,9 @@ function s:NewScratchBuffer(name)
     endif
     " Switch buffers
     if has("gui")
-        exec "drop" name
+        exec "silent keepjumps drop" name
     else
-        exec "hide edit" name
+        exec "silent keepjumps hide edit" name
     endif
     " Set the new buffer properties to be a scrach buffer
     setlocal bufhidden=delete
