@@ -41,17 +41,6 @@ setlocal foldtext=getline(v:foldstart).\"\ ...\"
 setlocal fillchars+=fold:\ 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Todo entry macros
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Datestamp
-iab ds <C-R>=strftime("%Y-%m-%d")<CR>
-" New todo entry - both command and abbreviation
-map \cn o[ ] ds 
-" TODO - make the abbreviation run 'ds' instead
-iab cn [ ] <C-R>=strftime("%Y-%m-%d")<CR>
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """ Checkboxes
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Note: These macros make use of the 'z' mark
@@ -396,6 +385,17 @@ function s:FindOrMakeDrawer(name)
     call append(line("."), indentstr.":".toupper(a:name).":")
     return line(".")+1
 endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""" Todo entry macros
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Datestamp
+iab ds <C-R>=strftime("%Y-%m-%d")<CR>
+" New todo entry - both command and abbreviation
+exe 'map \cn o'.TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
+exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
+            \' <C-R>=strftime("%Y-%m-%d")<CR>'
 
 " Restore the old compatible mode setting
 let &cpo = s:save_cpo
