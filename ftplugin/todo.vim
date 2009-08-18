@@ -170,6 +170,9 @@ function s:PromptTaskState()
                     \" :call <SID>SelectTaskState(\"".statekeys[key]."\"".
                     \",\"".oldstate."\",".idx.")<CR>"
     endfor
+    call append(line("$"), "    Press SPACE to remove any existing state")
+    exe "nnoremap <buffer> <silent> <Space> :call <SID>SelectTaskState(".
+                \'"","'.oldstate.'", '.idx.')<CR>'
 endfunction
 
 function s:SelectTaskState(state, oldstate, idx)
@@ -187,16 +190,25 @@ function s:SetTaskState(state, oldstate, idx)
     let line = getline(".")
     if a:idx > 0
         let parts=[line[0:a:idx-1],line[a:idx+len(a:oldstate):]]
+    elseif a:idx == -1
+        let parts=["", " ".line]
     else
         let parts=["",line[len(a:oldstate):]]
     endif
-    call setline(".", join(parts, a:state))
+    if a:state != ""
+        call setline(".", join(parts, a:state))
+    else
+        " Remove the state
+        call setline(".", join(parts, "")[1:])
+    endif
     " Logging code
     if g:todo_log == 1
         let log=a:state " TODO allow alternate log msg
-        call append(line("."),
-                    \ matchstr(getline("."), "^\\s\\+")."    ".
-                    \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+        if log != "" " Don't log removing a state
+            call append(line("."),
+                        \ matchstr(getline("."), "^\\s\\+")."    ".
+                        \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+        endif
     endif
 endfunction
 
