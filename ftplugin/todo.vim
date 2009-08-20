@@ -3,26 +3,92 @@
 " Last Change:  Aug 15, 2009
 " License:      ISC - See LICENSE file for details
 
-" Only load if we haven't already
+" Only load if we haven't already {{{1
 if exists("b:did_ftplugin")
     finish
 endif
 let b:did_ftplugin = 1
-
-" Make sure we aren't running in compatible mode
+"1}}}
+" Make sure we aren't running in compatible mode {{{1
 let s:save_cpo = &cpo
 set cpo&vim
+"1}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Setup script variables
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Utility Functions
+" s:Set - setup script variables {{{1
 function s:Set(varname, value)
     if !exists(a:varname)
         exec "let" a:varname "=" string(a:value)
     endif
 endfunction
+"1}}}
+" s:NewScratchBuffer - Create a new buffer {{{1
+function s:NewScratchBuffer(name, split)
+    if a:split
+        split
+    endif
+    " Set the buffer name
+    let name="[".a:name."]"
+    if !has("win32")
+        let name = escape(name, "[]")
+    endif
+    " Switch buffers
+    if has("gui")
+        exec "silent keepjumps drop" name
+    else
+        exec "silent keepjumps hide edit" name
+    endif
+    " Set the new buffer properties to be a scrach buffer
+    setlocal bufhidden=delete
+    setlocal buftype=nofile
+    setlocal modifiable " This needs to be changed once the buffer has stuff in
+    setlocal noswapfile
+    setlocal nowrap     " This can be changed if needed
+endfunction
+"1}}}
+" TodoParseTaskState {{{1
+" Parse a task state of the form TODO(t) into state and shortcut key
+function TodoParseTaskState(state)
+    let state=matchstr(a:state, '^[A-Z]\+')
+    let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
+    return { "state": state, "key": key }
+endfunction
+"1}}}
+""" Drawer Support
+" s:FindDrawer {{{1
+function s:FindDrawer(name)
+    let line = line(".")
+    let topindent = indent(line)
+    let line=line + 1
+    let indent = indent(line)
+    while indent(line) > topindent
+        if indent(line) == indent &&
+                    \ match(getline(line), '^\s\+:'.toupper(a:name).':') != -1
+            return line
+        endif
+        let line = line + 1
+    endwhile
+    return -1
+endfunction
+"1}}}
+" s:FindOrMakeDrawer {{{1
+function s:FindOrMakeDrawer(name)
+    let line = s:FindDrawer(a:name)
+    if line != -1
+        return line
+    endif
+    let topindent = indent(".")
+    let indent = indent(line(".") + 1)
+    if indent <= topindent
+        let indent = topindent + 4 " TODO - set this to shiftwidth
+    endif
+    let indentstr=printf("%".indent."s", "") " generate indent spaces
+    call append(line("."), indentstr.":".toupper(a:name).":")
+    return line(".")+1
+endfunction
+"1}}}
 
-" Default variables
+" Default variables {{{1
 "let todo_states = [["TODO", "DONE"]]
 call s:Set("g:todo_states",
     \[["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]])
@@ -32,20 +98,24 @@ call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
     \["Y", "N", "?"]])
 call s:Set("g:todo_log", 1)
 call s:Set("g:todo_log_drawer", "LOGBOOK")
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Folding support
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"1}}}
+" Folding support {{{1
 setlocal foldmethod=indent
 setlocal foldtext=getline(v:foldstart).\"\ ...\"
 setlocal fillchars+=fold:\ 
+" 1}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Checkboxes
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Note: These macros make use of the 'z' mark
-" TODO - ask on irc if there is an accepted way to do this in a macro
+" Todo entry macros
+" ds- Datestamp {{{1
+iab ds <C-R>=strftime("%Y-%m-%d")<CR>
+" cn, \cn - New todo entry {{{1
+exe 'map \cn o'.TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
+exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
+            \' <C-R>=strftime("%Y-%m-%d")<CR>'
+"1}}}
 
+" Checkboxes
+" InsertCheckbox {{{1
 " Make a checkbox at the beginning of the line, removes any preceding bullet
 " point dash
 if !exists("*s:InsertCheckbox")
@@ -62,8 +132,8 @@ if !hasmapto('<Plug>TodoInsertCheckbox')
 endif
 noremap <unique> <script> <Plug>TodoInsertCheckbox <SID>InsertCheckbox
 noremap <SID>InsertCheckbox :call <SID>InsertCheckbox()<CR>
-
-" Toggle a checkbox
+"1}}}
+" CheckboxToggle {{{1
 if !exists("*s:CheckboxToggle")
 function s:CheckboxToggle()
     echo "Toggle checkbox"
@@ -81,12 +151,6 @@ function s:CheckboxToggle()
                     let val=group[stateidx]
                     let parts=[line[0:idx],line[idx+2:]]
                     call setline(".", join(parts, val))
-                    " Logging code - not used in checkboxes
-                    "if g:todo_checkbox_log == 1
-                    "    let log=g:todo_checkbox_states[val]["log"]
-                    "    call append(line("."), matchstr(getline("."), "\\s\\+")."    ".
-                    "            \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
-                    "endif
                     return
                 endif
                 let stateidx=stateidx + 1
@@ -101,11 +165,10 @@ if !hasmapto('<Plug>TodoCheckboxToggle')
 endif
 noremap <unique> <script> <Plug>TodoCheckboxToggle <SID>CheckboxToggle
 noremap <SID>CheckboxToggle :call <SID>CheckboxToggle()<CR>
+"1}}}
 
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Task status
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Task status
+" s:NextTaskState {{{1
 if !exists("*s:NextTaskState")
 function s:NextTaskState()
     echo "Next task state"
@@ -137,14 +200,8 @@ if !hasmapto('<Plug>TodoNextTaskState')
 endif
 noremap <unique> <script> <Plug>TodoNextTaskState <SID>NextTaskState
 noremap <SID>NextTaskState :call <SID>NextTaskState()<CR>
-
-" Parse a task state of the form TODO(s) into a state and shortcut
-function TodoParseTaskState(state)
-    let state=matchstr(a:state, '^[A-Z]\+')
-    let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
-    return { "state": state, "key": key }
-endfunction
-
+"1}}}
+" s:PromptTaskState {{{1
 function s:PromptTaskState()
     let [oldstate, idx] = s:GetState()
     call s:NewScratchBuffer("StateSelect", 1)
@@ -180,17 +237,19 @@ function s:PromptTaskState()
     setlocal nomodifiable " Make the buffer read only
 endfunction
 
-function s:SelectTaskState(state, oldstate, idx)
-    bdelete
-    call s:SetTaskState(a:state, a:oldstate, a:idx)
-endfunction
-
 if !hasmapto('<Plug>TodoPromptTaskState')
     map <buffer> <unique> <LocalLeader>cv <Plug>TodoPromptTaskState
 endif
 noremap <unique> <script> <Plug>TodoPromptTaskState <SID>PromptTaskState
 noremap <SID>PromptTaskState :call <SID>PromptTaskState()<CR>
-
+"1}}}
+" s:SelectTaskState {{{1
+function s:SelectTaskState(state, oldstate, idx)
+    bdelete
+    call s:SetTaskState(a:state, a:oldstate, a:idx)
+endfunction
+"1}}}
+" s:SetTaskState {{{1
 function s:SetTaskState(state, oldstate, idx)
     let line = getline(".")
     if a:idx > 0
@@ -220,7 +279,8 @@ function s:SetTaskState(state, oldstate, idx)
         endif
     endif
 endfunction
-
+"1}}}
+" s:GetState {{{1
 " Gets the state on the current line, and the index of it
 function s:GetState()
     let line=getline(".")
@@ -229,16 +289,16 @@ function s:GetState()
     let state=matchstr(line, regex)
     return [state, idx]
 endfunction
+"1}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Task link
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Provides a link to a web based task manager
-" Need to set the todo_taskurl and todo_browser variables in .vimrc
-" E.g.
-" let todo_browser="gnome-open"
-" let todo_taskurl="http://www.example.com/tasks/?id=%s"
-" (The %s will be replaced with the task id)
+" Task Links
+" s:LoadTaskLink {{{1
+"   Provides a link to a web based task manager
+"   Need to set the todo_taskurl and todo_browser variables in .vimrc
+"   E.g.
+"   let todo_browser="gnome-open"
+"   let todo_taskurl="http://www.example.com/tasks/?id=%s"
+"   (The %s will be replaced with the task id)
 if !exists("*s:LoadTaskLink")
 function s:LoadTaskLink()
     let tid=matchstr(getline("."), "tid\\d\\+")
@@ -258,11 +318,8 @@ if !hasmapto('<Plug>TodoLoadTaskLink')
 endif
 noremap <unique> <script> <Plug>TodoLoadTaskLink <SID>LoadTaskLink
 noremap <SID>LoadTaskLink :call <SID>LoadTaskLink()<CR>
-
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" URL opening
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"1}}}
+" s:LoadLink - URL Opening {{{1
 " Uses todo_browser
 if !exists("*s:LoadLink")
 function s:LoadLink()
@@ -281,10 +338,10 @@ if !hasmapto('<Plug>TodoLoadLink')
 endif
 noremap <unique> <script> <Plug>TodoLoadLink <SID>LoadLink
 noremap <SID>LoadLink :call <SID>LoadLink()<CR>
+"1}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Task searching
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Task searching
+" s:ShowDueTasks {{{1
 if !exists("*s:ShowDueTasks")
 function s:ShowDueTasks(day, ...)
     " Based on the Todo function at
@@ -308,7 +365,8 @@ function s:ShowDueTasks(day, ...)
     exec "lw"
 endfunction
 endif
-
+"1}}}
+" ShowDueTasks Commands {{{1
 command -buffer Today :call s:ShowDueTasks(0)
 command -buffer Tomorrow :call s:ShowDueTasks(1)
 command -buffer Week :call s:ShowDueTasks(0,7)
@@ -326,76 +384,9 @@ endif
 if !hasmapto(':Overdue')
     map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
 endif
+"1}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Create a new buffer
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function s:NewScratchBuffer(name, split)
-    if a:split
-        split
-    endif
-    " Set the buffer name
-    let name="[".a:name."]"
-    if !has("win32")
-        let name = escape(name, "[]")
-    endif
-    " Switch buffers
-    if has("gui")
-        exec "silent keepjumps drop" name
-    else
-        exec "silent keepjumps hide edit" name
-    endif
-    " Set the new buffer properties to be a scrach buffer
-    setlocal bufhidden=delete
-    setlocal buftype=nofile
-    setlocal modifiable " This needs to be changed once the buffer has stuff in
-    setlocal noswapfile
-    setlocal nowrap     " This can be changed if needed
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Drawer functionality
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-function s:FindDrawer(name)
-    let line = line(".")
-    let topindent = indent(line)
-    let line=line + 1
-    let indent = indent(line)
-    while indent(line) > topindent
-        if indent(line) == indent &&
-                    \ match(getline(line), '^\s\+:'.toupper(a:name).':') != -1
-            return line
-        endif
-        let line = line + 1
-    endwhile
-    return -1
-endfunction
-
-function s:FindOrMakeDrawer(name)
-    let line = s:FindDrawer(a:name)
-    if line != -1
-        return line
-    endif
-    let topindent = indent(".")
-    let indent = indent(line(".") + 1)
-    if indent <= topindent
-        let indent = topindent + 4 " TODO - set this to shiftwidth
-    endif
-    let indentstr=printf("%".indent."s", "") " generate indent spaces
-    call append(line("."), indentstr.":".toupper(a:name).":")
-    return line(".")+1
-endfunction
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""" Todo entry macros
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Datestamp
-iab ds <C-R>=strftime("%Y-%m-%d")<CR>
-" New todo entry - both command and abbreviation
-exe 'map \cn o'.TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
-exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
-            \' <C-R>=strftime("%Y-%m-%d")<CR>'
-
-" Restore the old compatible mode setting
+" Restore the old compatible mode setting {{{1
 let &cpo = s:save_cpo
+"1}}}
+" vim:foldmethod=marker
