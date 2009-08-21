@@ -25,11 +25,12 @@ endfunction
 " s:Map - mapping helper function
 function s:Map(keys, funcname)
     if !hasmapto('<Plug>Todo'.a:funcname)
-        exe "map <buffer> <unique> <LocalLeader>".a:keys.
+        exe "map <buffer> <silent> <unique> <LocalLeader>".a:keys.
                     \" <Plug>Todo".a:funcname
     endif
-    exe "noremap <unique> <script> <Plug>Todo".a:funcname." <SID>".a:funcname
-    exe "noremap <SID>".a:funcname." :call <SID>".a:funcname."()<CR>"
+    exe "noremap <silent> <unique> <script> <Plug>Todo".a:funcname.
+                \" <SID>".a:funcname
+    exe "noremap <silent> <SID>".a:funcname." :call <SID>".a:funcname."()<CR>"
 endfunction
 "1}}}
 " s:NewScratchBuffer - Create a new buffer {{{1
