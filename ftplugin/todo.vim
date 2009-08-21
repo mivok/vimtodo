@@ -46,15 +46,14 @@ function s:NewScratchBuffer(name, split)
     setlocal nowrap     " This can be changed if needed
 endfunction
 "1}}}
-" TodoParseTaskState {{{1
-" Parse a task state of the form TODO(t) into state and shortcut key
+" TodoParseTaskState - Parse TODO(t) into state and shortcut key {{{1
 function TodoParseTaskState(state)
     let state=matchstr(a:state, '^[A-Z]\+')
     let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
     return { "state": state, "key": key }
 endfunction
 "1}}}
-""" Drawer Support
+" Drawer Functions
 " s:FindDrawer {{{1
 function s:FindDrawer(name)
     let line = line(".")
@@ -88,6 +87,7 @@ function s:FindOrMakeDrawer(name)
 endfunction
 "1}}}
 
+" Settings
 " Default variables {{{1
 "let todo_states = [["TODO", "DONE"]]
 call s:Set("g:todo_states",
@@ -106,7 +106,7 @@ setlocal fillchars+=fold:\
 " 1}}}
 
 " Todo entry macros
-" ds- Datestamp {{{1
+" ds - Datestamp {{{1
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " cn, \cn - New todo entry {{{1
 exe 'map \cn o'.TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
@@ -115,7 +115,7 @@ exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
 "1}}}
 
 " Checkboxes
-" InsertCheckbox {{{1
+" s:InsertCheckbox {{{1
 " Make a checkbox at the beginning of the line, removes any preceding bullet
 " point dash
 if !exists("*s:InsertCheckbox")
@@ -133,7 +133,7 @@ endif
 noremap <unique> <script> <Plug>TodoInsertCheckbox <SID>InsertCheckbox
 noremap <SID>InsertCheckbox :call <SID>InsertCheckbox()<CR>
 "1}}}
-" CheckboxToggle {{{1
+" s:CheckboxToggle {{{1
 if !exists("*s:CheckboxToggle")
 function s:CheckboxToggle()
     echo "Toggle checkbox"
@@ -366,7 +366,7 @@ function s:ShowDueTasks(day, ...)
 endfunction
 endif
 "1}}}
-" ShowDueTasks Commands {{{1
+" ShowDueTasks command definitions {{{1
 command -buffer Today :call s:ShowDueTasks(0)
 command -buffer Tomorrow :call s:ShowDueTasks(1)
 command -buffer Week :call s:ShowDueTasks(0,7)
