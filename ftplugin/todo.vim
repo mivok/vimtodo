@@ -22,6 +22,16 @@ function s:Set(varname, value)
     endif
 endfunction
 "1}}}
+" s:Map - mapping helper function
+function s:Map(keys, funcname)
+    if !hasmapto('<Plug>Todo'.a:funcname)
+        exe "map <buffer> <unique> <LocalLeader>".a:keys.
+                    \" <Plug>Todo".a:funcname
+    endif
+    exe "noremap <unique> <script> <Plug>Todo".a:funcname." <SID>".a:funcname
+    exe "noremap <SID>".a:funcname." :call <SID>".a:funcname."()<CR>"
+endfunction
+"1}}}
 " s:NewScratchBuffer - Create a new buffer {{{1
 function s:NewScratchBuffer(name, split)
     if a:split
@@ -51,6 +61,15 @@ function TodoParseTaskState(state)
     let state=matchstr(a:state, '^[A-Z]\+')
     let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
     return { "state": state, "key": key }
+endfunction
+"1}}}
+" s:GetState - Gets the state on the current line, and its index {{{1
+function s:GetState()
+    let line=getline(".")
+    let regex="\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@="
+    let idx=match(line, regex)
+    let state=matchstr(line, regex)
+    return [state, idx]
 endfunction
 "1}}}
 " Drawer Functions
@@ -104,6 +123,14 @@ setlocal foldmethod=indent
 setlocal foldtext=getline(v:foldstart).\"\ ...\"
 setlocal fillchars+=fold:\ 
 " 1}}}
+" Mappings {{{1
+call s:Map("cb", "InsertCheckbox")
+call s:Map("cc", "CheckboxToggle")
+call s:Map("cv", "PromptTaskState")
+call s:Map("cs", "NextTaskState")
+call s:Map("ct", "LoadTaskLink")
+call s:Map("cl", "LoadLink")
+"1}}}
 
 " Todo entry macros
 " ds - Datestamp {{{1
@@ -126,12 +153,6 @@ function! s:InsertCheckbox()
     call setpos(".", oldpos)
 endfunction
 endif
-
-if !hasmapto('<Plug>TodoInsertCheckbox')
-    map <buffer> <unique> <LocalLeader>cb <Plug>TodoInsertCheckbox
-endif
-noremap <unique> <script> <Plug>TodoInsertCheckbox <SID>InsertCheckbox
-noremap <SID>InsertCheckbox :call <SID>InsertCheckbox()<CR>
 "1}}}
 " s:CheckboxToggle {{{1
 if !exists("*s:CheckboxToggle")
@@ -159,12 +180,6 @@ function s:CheckboxToggle()
     endif
 endfunction
 endif
-
-if !hasmapto('<Plug>TodoCheckboxToggle')
-    map <buffer> <unique> <LocalLeader>cc <Plug>TodoCheckboxToggle
-endif
-noremap <unique> <script> <Plug>TodoCheckboxToggle <SID>CheckboxToggle
-noremap <SID>CheckboxToggle :call <SID>CheckboxToggle()<CR>
 "1}}}
 
 " Task status
@@ -194,12 +209,6 @@ function s:NextTaskState()
     endif
 endfunction
 endif
-
-if !hasmapto('<Plug>TodoNextTaskState')
-    map <buffer> <unique> <LocalLeader>cs <Plug>TodoNextTaskState
-endif
-noremap <unique> <script> <Plug>TodoNextTaskState <SID>NextTaskState
-noremap <SID>NextTaskState :call <SID>NextTaskState()<CR>
 "1}}}
 " s:PromptTaskState {{{1
 function s:PromptTaskState()
@@ -236,12 +245,6 @@ function s:PromptTaskState()
     nnoremap <buffer> <silent> <Esc> :bd<CR>
     setlocal nomodifiable " Make the buffer read only
 endfunction
-
-if !hasmapto('<Plug>TodoPromptTaskState')
-    map <buffer> <unique> <LocalLeader>cv <Plug>TodoPromptTaskState
-endif
-noremap <unique> <script> <Plug>TodoPromptTaskState <SID>PromptTaskState
-noremap <SID>PromptTaskState :call <SID>PromptTaskState()<CR>
 "1}}}
 " s:SelectTaskState {{{1
 function s:SelectTaskState(state, oldstate, idx)
@@ -280,16 +283,6 @@ function s:SetTaskState(state, oldstate, idx)
     endif
 endfunction
 "1}}}
-" s:GetState {{{1
-" Gets the state on the current line, and the index of it
-function s:GetState()
-    let line=getline(".")
-    let regex="\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@="
-    let idx=match(line, regex)
-    let state=matchstr(line, regex)
-    return [state, idx]
-endfunction
-"1}}}
 
 " Task Links
 " s:LoadTaskLink {{{1
@@ -312,12 +305,6 @@ function s:LoadTaskLink()
     endif
 endfunction
 endif
-
-if !hasmapto('<Plug>TodoLoadTaskLink')
-    map <buffer> <unique> <LocalLeader>ct <Plug>TodoLoadTaskLink
-endif
-noremap <unique> <script> <Plug>TodoLoadTaskLink <SID>LoadTaskLink
-noremap <SID>LoadTaskLink :call <SID>LoadTaskLink()<CR>
 "1}}}
 " s:LoadLink - URL Opening {{{1
 " Uses todo_browser
@@ -332,12 +319,6 @@ function s:LoadLink()
     endif
 endfunction
 endif
-
-if !hasmapto('<Plug>TodoLoadLink')
-    map <buffer> <unique> <LocalLeader>cl <Plug>TodoLoadLink
-endif
-noremap <unique> <script> <Plug>TodoLoadLink <SID>LoadLink
-noremap <SID>LoadLink :call <SID>LoadLink()<CR>
 "1}}}
 
 " Task searching
