@@ -22,7 +22,7 @@ function s:Set(varname, value)
     endif
 endfunction
 "1}}}
-" s:Map - mapping helper function
+" s:Map - mapping helper function {{{1
 function s:Map(keys, funcname)
     if !hasmapto('<Plug>Todo'.a:funcname)
         exe "map <buffer> <silent> <unique> <LocalLeader>".a:keys.
