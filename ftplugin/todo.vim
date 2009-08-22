@@ -154,6 +154,7 @@ call s:Map("cv", "PromptTaskState")
 call s:Map("cs", "NextTaskState")
 call s:Map("ct", "LoadTaskLink")
 call s:Map("cl", "LoadLink")
+call s:Map("ca", "ArchiveDone")
 "1}}}
 
 " Todo entry macros
@@ -420,7 +421,7 @@ function s:ArchiveDone()
 endfunction
 endif
 " 1}}}
-" s:ArchiveTask - Archives {{{1
+" s:ArchiveTask - Archives a range of lines {{{1
 if !exists("*s:ArchiveTask")
 function s:ArchiveTask(startline, endline)
     exe a:startline.",".a:endline."w! >>".
