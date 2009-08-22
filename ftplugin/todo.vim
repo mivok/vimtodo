@@ -64,14 +64,36 @@ function TodoParseTaskState(state)
     return { "state": state, "key": key }
 endfunction
 "1}}}
-" s:GetState - Gets the state on the current line, and its index {{{1
-function s:GetState()
-    let line=getline(".")
+" s:GetState - Gets the state for a line, and its index {{{1
+function s:GetState(line)
+    let line=getline(a:line)
     let regex="\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@="
     let idx=match(line, regex)
     let state=matchstr(line, regex)
     return [state, idx]
 endfunction
+"1}}}
+" s:IsDoneState - Tests if a state is considered 'done' {{{1
+if !exists("*s:IsDoneState")
+function s:IsDoneState(state)
+    for group in g:todo_states
+        let idx = index(group, "|")
+        if idx != -1
+            let idx = idx + 1
+        elseif idx == len(group)
+            continue
+        endif
+        " Note, having idx set to -1 (when there is no |) means we will be
+        " looking at the last item, which is the desired behavior.
+        for teststate in group[idx+0:]
+            if TodoParseTaskState(teststate)["state"] == a:state
+                return 1
+            endif
+        endfor
+    endfor
+    return 0
+endfunction
+endif
 "1}}}
 " Drawer Functions
 " s:FindDrawer {{{1
@@ -118,6 +140,7 @@ call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
     \["Y", "N", "?"]])
 call s:Set("g:todo_log", 1)
 call s:Set("g:todo_log_drawer", "LOGBOOK")
+call s:Set("g:todo_done_file", "done.txt")
 "1}}}
 " Folding support {{{1
 setlocal foldmethod=indent
@@ -188,7 +211,7 @@ endif
 if !exists("*s:NextTaskState")
 function s:NextTaskState()
     echo "Next task state"
-    let [oldstate, idx] = s:GetState()
+    let [oldstate, idx] = s:GetState(".")
     if idx != -1
         for group in g:todo_states
             let stateidx = 0
@@ -213,7 +236,7 @@ endif
 "1}}}
 " s:PromptTaskState {{{1
 function s:PromptTaskState()
-    let [oldstate, idx] = s:GetState()
+    let [oldstate, idx] = s:GetState(".")
     call s:NewScratchBuffer("StateSelect", 1)
     call append(0, "Pick the new task state")
     let statekeys = {}
@@ -367,6 +390,45 @@ if !hasmapto(':Overdue')
     map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
 endif
 "1}}}
+
+" Task reorganizing
+" s:ArchiveDone {{{1
+if !exists("*s:ArchiveDone")
+function s:ArchiveDone()
+    let line=0
+    let startline=-1 " Start line of a task
+    let topstate="" " The state for the toplevel task
+    while line < line('$')
+        let line = line+1
+        let [state, idx] = s:GetState(line)
+        if idx == 0 " Start of a new task
+            " Archive the old task if it is relevant
+            if startline != -1 && s:IsDoneState(topstate)
+                " We removed a chunk of text, set our line number correctly
+                call s:ArchiveTask(startline, line - 1)
+                let line=startline
+            endif
+            " Set the state for the new task
+            let topstate=state
+            let startline=line
+        endif
+    endwhile
+    " Deal with the last task
+    if startline != -1 && s:IsDoneState(topstate)
+        call s:ArchiveTask(startline, line)
+    endif
+endfunction
+endif
+" 1}}}
+" s:ArchiveTask - Archives {{{1
+if !exists("*s:ArchiveTask")
+function s:ArchiveTask(startline, endline)
+    exe a:startline.",".a:endline."w! >>".
+                \fnamemodify("%",":p:h")."/".g:todo_done_file
+    exe a:startline.",".a:endline."d"
+endfunction
+endif
+" 1}}}
 
 " Restore the old compatible mode setting {{{1
 let &cpo = s:save_cpo
