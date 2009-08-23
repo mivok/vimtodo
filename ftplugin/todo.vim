@@ -391,6 +391,33 @@ if !hasmapto(':Overdue')
     map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
 endif
 "1}}}
+" s:TaskSearch {{{1
+if !exists("*s:TaskSearch")
+function s:TaskSearch(...)
+    " Use vimgrep to find any task header lines
+    try
+        " TODO - make this support multiple files
+        lvimgrep /^\s*[A-Z]\+\s/j %
+    catch /^Vim(\a\+):E480:/
+    endtry
+    let results = []
+    " Now filter these
+    for d in getloclist(0)
+        let matched = 1
+        for pat in a:000
+            if match(d.text, pat) == -1
+                let matched = 0
+            endif
+        endfor
+        if matched
+            call add(results, d)
+        endif
+    endfor
+    " Replace the results with the filtered results
+    call setloclist(0, results, 'r')
+endfunction
+endif
+" 1}}}
 
 " Task reorganizing
 " s:ArchiveDone {{{1
