@@ -45,7 +45,7 @@ hi def link     todoURI         String
 hi def link     todoEmail       String
 
 " Highlight state colors
-function s:HighlightStatus(name, color)
+function! s:HighlightStatus(name, color)
     " Sets the highlight for a particular status to the given color
     let name=toupper(a:name)
     exe "syn match todoState".name." /\\(^\\s*\\)\\@<=".name.
@@ -58,7 +58,7 @@ for state in keys(g:todo_state_colors)
 endfor
 
 " Might want to make this dynamic so we can add 'contains=todoLogDONE' etc.
-function s:HighlightDone()
+function! s:HighlightDone()
     for group in g:todo_states
         let idx = index(group, "|")
         if idx != -1
