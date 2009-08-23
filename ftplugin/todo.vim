@@ -16,25 +16,26 @@ set cpo&vim
 
 " Utility Functions
 " s:Set - setup script variables {{{1
-function s:Set(varname, value)
+function! s:Set(varname, value)
     if !exists(a:varname)
         exec "let" a:varname "=" string(a:value)
     endif
 endfunction
 "1}}}
 " s:Map - mapping helper function {{{1
-function s:Map(keys, funcname)
+function! s:Map(keys, funcname)
     if !hasmapto('<Plug>Todo'.a:funcname)
         exe "map <buffer> <silent> <unique> <LocalLeader>".a:keys.
                     \" <Plug>Todo".a:funcname
     endif
-    exe "noremap <silent> <unique> <script> <Plug>Todo".a:funcname.
+    exe "noremap <buffer> <silent> <unique> <script> <Plug>Todo".a:funcname.
                 \" <SID>".a:funcname
-    exe "noremap <silent> <SID>".a:funcname." :call <SID>".a:funcname."()<CR>"
+    exe "noremap <buffer> <silent> <SID>".a:funcname." :call <SID>".
+                \a:funcname."()<CR>"
 endfunction
 "1}}}
 " s:NewScratchBuffer - Create a new buffer {{{1
-function s:NewScratchBuffer(name, split)
+function! s:NewScratchBuffer(name, split)
     if a:split
         split
     endif
@@ -58,14 +59,14 @@ function s:NewScratchBuffer(name, split)
 endfunction
 "1}}}
 " TodoParseTaskState - Parse TODO(t) into state and shortcut key {{{1
-function TodoParseTaskState(state)
+function! TodoParseTaskState(state)
     let state=matchstr(a:state, '^[A-Z]\+')
     let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
     return { "state": state, "key": key }
 endfunction
 "1}}}
 " s:GetState - Gets the state for a line, and its index {{{1
-function s:GetState(line)
+function! s:GetState(line)
     let line=getline(a:line)
     let regex="\\(^\\s*\\)\\@<=[A-Z]\\+\\(\\s\\|$\\)\\@="
     let idx=match(line, regex)
@@ -74,8 +75,7 @@ function s:GetState(line)
 endfunction
 "1}}}
 " s:IsDoneState - Tests if a state is considered 'done' {{{1
-if !exists("*s:IsDoneState")
-function s:IsDoneState(state)
+function! s:IsDoneState(state)
     for group in g:todo_states
         let idx = index(group, "|")
         if idx != -1
@@ -93,11 +93,10 @@ function s:IsDoneState(state)
     endfor
     return 0
 endfunction
-endif
 "1}}}
 " Drawer Functions
 " s:FindDrawer {{{1
-function s:FindDrawer(name)
+function! s:FindDrawer(name)
     let line = line(".")
     let topindent = indent(line)
     let line=line + 1
@@ -113,7 +112,7 @@ function s:FindDrawer(name)
 endfunction
 "1}}}
 " s:FindOrMakeDrawer {{{1
-function s:FindOrMakeDrawer(name)
+function! s:FindOrMakeDrawer(name)
     let line = s:FindDrawer(a:name)
     if line != -1
         return line
@@ -170,18 +169,15 @@ exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
 " s:InsertCheckbox {{{1
 " Make a checkbox at the beginning of the line, removes any preceding bullet
 " point dash
-if !exists("*s:InsertCheckbox")
 function! s:InsertCheckbox()
     echo "Insert checkbox"
     let oldpos=getpos(".")
     s/^\(\s*\)\?\(- \)\?/\1[ ] /
     call setpos(".", oldpos)
 endfunction
-endif
 "1}}}
 " s:CheckboxToggle {{{1
-if !exists("*s:CheckboxToggle")
-function s:CheckboxToggle()
+function! s:CheckboxToggle()
     echo "Toggle checkbox"
     let line=getline(".")
     let idx=match(line, "\\[[^]]\\]")
@@ -204,13 +200,11 @@ function s:CheckboxToggle()
         endfor
     endif
 endfunction
-endif
 "1}}}
 
 " Task status
 " s:NextTaskState {{{1
-if !exists("*s:NextTaskState")
-function s:NextTaskState()
+function! s:NextTaskState()
     echo "Next task state"
     let [oldstate, idx] = s:GetState(".")
     if idx != -1
@@ -233,10 +227,9 @@ function s:NextTaskState()
         endfor
     endif
 endfunction
-endif
 "1}}}
 " s:PromptTaskState {{{1
-function s:PromptTaskState()
+function! s:PromptTaskState()
     let [oldstate, idx] = s:GetState(".")
     call s:NewScratchBuffer("StateSelect", 1)
     call append(0, "Pick the new task state")
@@ -272,13 +265,13 @@ function s:PromptTaskState()
 endfunction
 "1}}}
 " s:SelectTaskState {{{1
-function s:SelectTaskState(state, oldstate, idx)
+function! s:SelectTaskState(state, oldstate, idx)
     bdelete
     call s:SetTaskState(a:state, a:oldstate, a:idx)
 endfunction
 "1}}}
 " s:SetTaskState {{{1
-function s:SetTaskState(state, oldstate, idx)
+function! s:SetTaskState(state, oldstate, idx)
     let line = getline(".")
     if a:idx > 0
         let parts=[line[0:a:idx-1],line[a:idx+len(a:oldstate):]]
@@ -317,8 +310,7 @@ endfunction
 "   let todo_browser="gnome-open"
 "   let todo_taskurl="http://www.example.com/tasks/?id=%s"
 "   (The %s will be replaced with the task id)
-if !exists("*s:LoadTaskLink")
-function s:LoadTaskLink()
+function! s:LoadTaskLink()
     let tid=matchstr(getline("."), "tid\\d\\+")
     if tid != ""
         let tid = matchstr(tid, "\\d\\+")
@@ -329,12 +321,10 @@ function s:LoadTaskLink()
         echo "No Task ID found"
     endif
 endfunction
-endif
 "1}}}
 " s:LoadLink - URL Opening {{{1
 " Uses todo_browser
-if !exists("*s:LoadLink")
-function s:LoadLink()
+function! s:LoadLink()
     let url=matchstr(getline("."), "https\\?://\\S\\+")
     if url != ""
         call system(g:todo_browser . " " . url)
@@ -343,13 +333,11 @@ function s:LoadLink()
         echo "No URL Found"
     endif
 endfunction
-endif
 "1}}}
 
 " Task searching
 " s:ShowDueTasks {{{1
-if !exists("*s:ShowDueTasks")
-function s:ShowDueTasks(day, ...)
+function! s:ShowDueTasks(day, ...)
     " Based on the Todo function at
     " http://ifacethoughts.net/2008/05/11/task-management-using-vim/
     " Add the first day
@@ -370,7 +358,6 @@ function s:ShowDueTasks(day, ...)
     endif
     exec "lw"
 endfunction
-endif
 "1}}}
 " ShowDueTasks command definitions {{{1
 command -buffer Today :call s:ShowDueTasks(0)
@@ -392,8 +379,7 @@ if !hasmapto(':Overdue')
 endif
 "1}}}
 " s:TaskSearch {{{1
-if !exists("*s:TaskSearch")
-function s:TaskSearch(...)
+function! s:TaskSearch(...)
     " Use vimgrep to find any task header lines
     try
         " TODO - make this support multiple files
@@ -416,13 +402,11 @@ function s:TaskSearch(...)
     " Replace the results with the filtered results
     call setloclist(0, results, 'r')
 endfunction
-endif
 " 1}}}
 
 " Task reorganizing
 " s:ArchiveDone {{{1
-if !exists("*s:ArchiveDone")
-function s:ArchiveDone()
+function! s:ArchiveDone()
     let line=0
     let startline=-1 " Start line of a task
     let topstate="" " The state for the toplevel task
@@ -446,16 +430,13 @@ function s:ArchiveDone()
         call s:ArchiveTask(startline, line)
     endif
 endfunction
-endif
 " 1}}}
 " s:ArchiveTask - Archives a range of lines {{{1
-if !exists("*s:ArchiveTask")
-function s:ArchiveTask(startline, endline)
+function! s:ArchiveTask(startline, endline)
     exe a:startline.",".a:endline."w! >>".
                 \fnamemodify("%",":p:h")."/".g:todo_done_file
     exe a:startline.",".a:endline."d"
 endfunction
-endif
 " 1}}}
 
 " Restore the old compatible mode setting {{{1
