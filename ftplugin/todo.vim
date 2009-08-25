@@ -94,6 +94,19 @@ function! s:IsDoneState(state)
     return 0
 endfunction
 "1}}}
+" s:ParseDate {{{1
+" Parses A string of the form YYYY-MM-DD into an integer for comparison
+" purposes. Supports YYYY-M-D formats too
+function! s:ParseDate(datestr)
+    let ml = matchlist(a:datestr,
+                \'\(\d\{4\}\)-\(\d\{1,2\}\)-\(\d\{1,2\}\)')
+    if ml == []
+        return 0
+    endif
+    let [y, m, d] = ml[1:3]
+    return str2nr(printf("%d%02d%02d", y,m,d))
+endfunction
+" 1}}}
 " Drawer Functions
 " s:FindDrawer {{{1
 function! s:FindDrawer(name)
@@ -379,7 +392,17 @@ if !hasmapto(':Overdue')
 endif
 "1}}}
 " s:TaskSearch {{{1
-function! s:TaskSearch(...)
+" daterange should be a list - [start, end] where start, end are numbers
+" relative to today (0 = today, 1 = tomorrow, -1 = yesterday, -7 = this time
+" last week). Use a blank list to not filter by date.
+function! s:TaskSearch(daterange, ...)
+    " Get comparable versions of the dates
+    if a:daterange != []
+        let startdate = str2nr(strftime(
+                    \"%Y%m%d", localtime() + a:daterange[0] * 86400))
+        let enddate = str2nr(strftime(
+                    \"%Y%m%d", localtime() + a:daterange[1] * 86400))
+    endif
     " Use vimgrep to find any task header lines
     try
         " TODO - make this support multiple files
@@ -395,12 +418,24 @@ function! s:TaskSearch(...)
                 let matched = 0
             endif
         endfor
+        if a:daterange != []
+            " Filter by date
+            let date = s:ParseDate(matchstr(d.text,
+                        \'{\d\{4\}-\d\{1,2\}-\d\{1,2\}}'))
+            if date < startdate
+                let matched = 0
+            endif
+            if date > enddate
+                let matched = 0
+            endif
+        endif
         if matched
             call add(results, d)
         endif
     endfor
     " Replace the results with the filtered results
     call setloclist(0, results, 'r')
+    lw
 endfunction
 " 1}}}
 
