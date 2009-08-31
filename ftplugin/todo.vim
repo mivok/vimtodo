@@ -150,8 +150,8 @@ call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green",
     \ "CANCELLED" : "Red", "WAITING": "Yellow", "CLOSED": "Grey" })
 call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
     \["Y", "N", "?"]])
-call s:Set("g:todo_log", 1)
-call s:Set("g:todo_log_drawer", "LOGBOOK")
+call s:Set("g:todo_log_done", 1)
+call s:Set("g:todo_log_into_drawer", "LOGBOOK")
 call s:Set("g:todo_done_file", "done.txt")
 "1}}}
 " Folding support {{{1
@@ -300,16 +300,46 @@ function! s:SetTaskState(state, oldstate, idx)
         call setline(".", join(parts, "")[1:])
     endif
     " Logging code
-    " TODO - separate logging of all state changes from logging open/closed
-    " Only log all state changes to the drawer
-    " Others go on the first line
-    if g:todo_log == 1
+    " Log all states
+    if g:todo_log_into_drawer != ""
         let log=a:state
         if log != "" " Don't log removing a state
-            let drawerline = s:FindOrMakeDrawer(g:todo_log_drawer)
+            let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer)
             call append(drawerline,
                         \ matchstr(getline(drawerline), "^\\s\\+")."    ".
                         \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
+        endif
+    endif
+    " Logging done time
+    if g:todo_log_done == 1
+        let nextline = line(".") + 1
+        let closedregex = '^\s\+CLOSED:'
+        if s:IsDoneState(a:state)
+            let closedstr = matchstr(getline("."), "^\\s\\+")."    ".
+                        \ "CLOSED: ".strftime("%Y-%m-%d %H:%M:%S")
+            " Set the CLOSED: status line
+            if getline(nextline) !~ closedregex
+                " Preserve whether the fold was open or closed for the
+                " appended line
+                let foldclosed = foldclosed(line(".") + 1)
+                call append(".", closedstr)
+                if foldclosed == -1
+                    normal jzok
+                endif
+            else
+                call setline(nextline, closedstr)
+            endif
+        else
+            " Delete any CLOSED: status line if it exists
+            if getline(nextline) =~ closedregex
+                if foldclosed(nextline) == -1
+                    " Need to temporarily open the fold if it is closed
+                    normal jddk
+                else
+                    " Delete next line
+                    normal jzoddzck
+                endif
+            endif
         endif
     endif
 endfunction
