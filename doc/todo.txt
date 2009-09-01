@@ -1,0 +1,112 @@
+*todo.txt*  Vim todo list plugin
+
+Vim todo list plugin                                            *vimtodo*
+
+Plugin for managing hierarchical to do lists in vim.
+
+==============================================================================
+ABOUT                                                   *vimtodo-about*
+
+Vimtodo originally started out as a set of syntax highlights for the todo.txt
+(http://www.todotxt.com/) format in vim with a few added extras such as
+subtasks. However, it quickly grew into a fully fledged task management
+system, taking several ideas from Emacs' org-mode (http://www.orgmode.org/).
+
+==============================================================================
+INSTALLATION                                            *vimtodo-installation*
+
+Vimtodo is distributed as a |vimball| package. To install it, to the
+following: >
+    vim vimtodo.vba
+    :so %
+    :q
+
+This will install the plugin in your ~/.vim directory, or a different
+directory if you have configured vim to install plugins elsewhere.
+
+==============================================================================
+BASIC TODO ENTRIES                                      *vimtodo-basics*
+
+To start with, open up a new file, and add the following line to the
+beginning: >
+    # vim:ft=todo
+
+This line tells vim that the file is a vimtodo file. See |modeline| for more
+information. Now write the file, quit and reopen it. Alternative, you can just
+type the following to set the filetype without reopening the file: >
+    :set ft=todo
+
+To do entries are simply lines in the file that follow a specific format. Add
+the following line into the file: >
+    TODO 2009-09-01 @computer +learnvim Read vim tutorial
+
+This is a todo entry. You can also add a new entry, with the 'cn' alias. In
+insert mode, type 'cn' and a new todo entry along with the current date will
+be added. You can also use <Leader>cn in normal mode to add a new entry.
+
+- What is in a task
+- Change Status <Leader>cs
+    - CLOSED, LOGBOOK entries
+- Task notes/subtasks
+- Due date
+    - filtering
+- More filtering - context/project
+
+==============================================================================
+TASK STATES
+    - \cs
+    - Done states
+        - Some states are considered DONE
+            - special highlighting
+            - CLOSED: tag (see below)
+    - Logging
+        - CLOSED
+        - LOGBOOK drawer
+        - Logging settings
+    - Select a task \cv
+    - Custom task states
+        - Shortcut keys
+        - Multiple task cycles
+        - Done states - "|" or last state in a cycle
+            - Use "|" at the beginning for all done states in a cycle
+            - Use "|" at the end for no done states in a cycle
+        - Colors
+
+==============================================================================
+ARCHIVING
+    - \cd
+    - Archives to a single file, default done.txt in the same directory as the
+      todo file.
+    - Customizable with the g:todo_done_file setting
+==============================================================================
+FILTERING
+    - By context, project, task ID
+    - Due date
+    - Task status
+        - Closed/Open
+==============================================================================
+CHECKBOXES
+    - \cc
+    - Progression - ' ', X; +,-,.; Y,N,?
+    - Custom progression
+    - Special checkbox types (when implemented)
+
+==============================================================================
+TASK LINKS
+    - External task management system
+        tidXXXX
+        todo_taskurl
+        todo_browser
+        \ct
+    - URL opening
+        \cl - todo_browser
+
+==============================================================================
+FOLDING
+    - This is mostly vim folding based on indentation level
+    - Mention some basics
+
+==============================================================================
+  vim:ft=help:tw=78
+
+
