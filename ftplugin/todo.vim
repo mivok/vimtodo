@@ -109,14 +109,27 @@ endfunction
 " 1}}}
 " Drawer Functions
 " s:FindDrawer {{{1
-function! s:FindDrawer(name)
-    let line = line(".")
-    let topindent = indent(line)
-    let line=line + 1
-    let indent = indent(line)
+function! s:FindDrawer(name, line)
+    let line=a:line
+    " Strings will evaluate to 0 - so process it with the line function if we
+    " have a string.
+    if line == 0
+        let line = line(line)
+    endif
+    if line == -1
+        " -1 means look for a top-level drawer
+        let topindent = -1
+        let indent = 0
+        let line += 1
+    else
+        " Look for a drawer inside the current entry
+        let topindent = indent(line)
+        let line=line + 1
+        let indent = indent(line)
+    endif
     while indent(line) > topindent
         if indent(line) == indent &&
-                    \ match(getline(line), '^\s\+:'.toupper(a:name).':') != -1
+                    \ match(getline(line), '^\s*:'.toupper(a:name).':') != -1
             return line
         endif
         let line = line + 1
@@ -125,8 +138,8 @@ function! s:FindDrawer(name)
 endfunction
 "1}}}
 " s:FindOrMakeDrawer {{{1
-function! s:FindOrMakeDrawer(name)
-    let line = s:FindDrawer(a:name)
+function! s:FindOrMakeDrawer(name, line)
+    let line = s:FindDrawer(a:name, a:line)
     if line != -1
         return line
     endif
@@ -140,10 +153,22 @@ function! s:FindOrMakeDrawer(name)
     return line(".")+1
 endfunction
 "1}}}
+" s:GetNextProperty {{{1
+function! s:GetNextProperty(drawerline, propertyline)
+    let indent = indent(a:drawerline)
+    let propindent = indent(a:propertyline)
+    if propindent <= indent
+        " We exited the drawer, return nothing
+        return ["",""]
+    endif
+    let match = matchlist(getline(a:propertyline),
+                \'^\s\++\([A-Z]\+\):\s\?\(.*\)$')
+    return match[1:2]
+endfunction
+" 1}}}
 
 " Settings
 " Default variables {{{1
-"let todo_states = [["TODO", "DONE"]]
 call s:Set("g:todo_states",
     \[["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]])
 call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green",
@@ -154,6 +179,75 @@ call s:Set("g:todo_log_done", 1)
 call s:Set("g:todo_log_into_drawer", "LOGBOOK")
 call s:Set("g:todo_done_file", "done.txt")
 "1}}}
+" Per file variables {{{1
+let s:PropertyVars = {
+            \'LOGDONE':         'g:todo_log_done',
+            \'LOGDRAWER':       'g:todo_log_drawer',
+            \'DONEFILE':        'g:todo_done_file',
+            \'STATES':          'g:todo_states',
+            \'STATECOLORS':     'g:todo_state_colors',
+            \'CHECKBOXSTATES':  'g:todo_checkbox_states'
+            \}
+let s:PropertyTypes = {
+            \'STATES':          'nestedlist',
+            \'STATECOLORS':     'dict',
+            \'CHECKBOXSTATES':  'nestedlist'
+            \}
+function! s:LoadFileVars()
+    let drawerline=s:FindDrawer("SETTINGS", 0)
+    if drawerline == -1
+        return
+    endif
+    let propertyline=drawerline + 1
+    let [name, val] = s:GetNextProperty(drawerline, propertyline)
+    " Keep track of which variables have already been wiped - list/dict vars
+    " need the original value overwriting for the first settings line, but
+    " then have values appended for subsequent lines
+    let wiped = {}
+    while name != ""
+        " Look up a name to variable mapping
+        if has_key(s:PropertyVars, name)
+            let type = get(s:PropertyTypes, name, "normal")
+            if type == "normal"
+                exe "let" s:PropertyVars[name]."=val"
+            elseif type == "dict"
+                if !has_key(wiped, name)
+                    " Wipe the original value if needed
+                    let wiped[name] = 1
+                    exe "let" s:PropertyVars[name]."={}"
+                endif
+                let parts = split(val, ',')
+                for part in parts
+                    let [k,v] = split(part, ':')
+                    " Strip spaces
+                    let k = matchstr(k, '^\s*\(.*\S\)\s*$')
+                    let v = matchstr(v, '^\s*\(.*\S\)\s*$')
+                    exe "let" s:PropertyVars[name]."[k]=v"
+                endfor
+            elseif type == "nestedlist"
+                if !has_key(wiped, name)
+                    " Wipe the original value if needed
+                    let wiped[name] = 1
+                    exe "let" s:PropertyVars[name]."=[]"
+                endif
+                let parts = split(val, '\s\+')
+                exe "call add("s:PropertyVars[name].",parts)"
+            elseif type == "list"
+                if !has_key(wiped, name)
+                    " Wipe the original value if needed
+                    let wiped[name] = 1
+                    exe "let" s:PropertyVars[name]."=[]"
+                endif
+                let parts = split(val, '\s\+')
+                exe "call extend("s:PropertyVars[name].",parts)"
+            endif
+        endif
+        let propertyline += 1
+        let [name, val] = s:GetNextProperty(drawerline, propertyline)
+    endwhile
+endfunction
+call s:LoadFileVars()
+" 1}}}
 " Folding support {{{1
 setlocal foldmethod=indent
 setlocal foldtext=getline(v:foldstart).\"\ ...\"
@@ -304,7 +398,7 @@ function! s:SetTaskState(state, oldstate, idx)
     if g:todo_log_into_drawer != ""
         let log=a:state
         if log != "" " Don't log removing a state
-            let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer)
+            let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer, ".")
             call append(drawerline,
                         \ matchstr(getline(drawerline), "^\\s\\+")."    ".
                         \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
