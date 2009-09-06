@@ -593,7 +593,7 @@ endfunction
 " s:ArchiveTask - Archives a range of lines {{{1
 function! s:ArchiveTask(startline, endline)
     exe a:startline.",".a:endline."w! >>".
-                \fnamemodify("%",":p:h")."/".g:todo_done_file
+                \fnamemodify(expand("%"),":p:h")."/".g:todo_done_file
     exe a:startline.",".a:endline."d"
 endfunction
 " 1}}}
