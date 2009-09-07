@@ -4,7 +4,7 @@
 
 " Use TAP
 call vimtest#StartTap()
-call vimtap#Plan(6)
+call vimtap#Plan(8)
 
 " We create the settings entries first because we are testing functionality
 " that occurs when the plugin is loaded
@@ -19,6 +19,8 @@ insert
     +STATECOLORS: INPROGRESS: magenta , FOO:red
     +CHECKBOXSTATES: A B C
     +CHECKBOXSTATES: 1 2 3
+    +TASKURL: http://www.google.com/%s
+    +BROWSER: firefox
 .
 
 " Load the todo plugin
@@ -35,5 +37,7 @@ call vimtap#Is(g:todo_state_colors, { "TODO": "green", "DONE": "blue",
             \ "INPROGRESS": "magenta", "FOO": "red" }, "STATECOLORS")
 call vimtap#Is(g:todo_checkbox_states, [["A", "B", "C"], ["1", "2", "3"]],
             \ "CHECKBOXSTATES")
+call vimtap#Is(g:todo_taskurl, "http://www.google.com/%s", "TASKURL")
+call vimtap#Is(g:todo_browser, "firefox", "BROWSER")
 
 call vimtest#Quit()

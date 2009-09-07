@@ -186,7 +186,9 @@ let s:PropertyVars = {
             \'DONEFILE':        'g:todo_done_file',
             \'STATES':          'g:todo_states',
             \'STATECOLORS':     'g:todo_state_colors',
-            \'CHECKBOXSTATES':  'g:todo_checkbox_states'
+            \'CHECKBOXSTATES':  'g:todo_checkbox_states',
+            \'TASKURL':         'g:todo_taskurl',
+            \'BROWSER':         'g:todo_browser'
             \}
 let s:PropertyTypes = {
             \'STATES':          'nestedlist',
