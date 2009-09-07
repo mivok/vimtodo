@@ -78,10 +78,10 @@ endfunction
 function! s:IsDoneState(state)
     for group in g:todo_states
         let idx = index(group, "|")
-        if idx != -1
-            let idx = idx + 1
-        elseif idx == len(group)
+        if idx == len(group)
             continue
+        elseif idx != -1
+            let idx = idx + 1
         endif
         " Note, having idx set to -1 (when there is no |) means we will be
         " looking at the last item, which is the desired behavior.
@@ -92,6 +92,23 @@ function! s:IsDoneState(state)
         endfor
     endfor
     return 0
+endfunction
+"1}}}
+" s:GetDoneStates - Returns a list of all done states {{{1
+function! s:GetDoneStates()
+    let states = []
+    for group in g:todo_states
+        let idx = index(group, "|")
+        if idx == len(group)
+            continue
+        elseif idx != -1
+            let idx = idx + 1
+        endif
+        for state in group[idx :]
+            call add(states, TodoParseTaskState(state)['state'])
+        endfor
+    endfor
+    return states
 endfunction
 "1}}}
 " s:ParseDate {{{1
@@ -477,48 +494,6 @@ endfunction
 "1}}}
 
 " Task searching
-" s:ShowDueTasks {{{1
-function! s:ShowDueTasks(day, ...)
-    " Based on the Todo function at
-    " http://ifacethoughts.net/2008/05/11/task-management-using-vim/
-    " Add the first day
-    let _date = strftime("%Y-%m-%d", localtime() + a:day * 86400)
-    try
-        exec "lvimgrep /{" . _date . "}/j %"
-    catch /^Vim(\a\+):E480:/
-    endtry
-    " Add any more in the day range
-    if a:0 > 0
-        for offset in range(a:day+1, a:1)
-            let _date = strftime("%Y-%m-%d", localtime() + offset * 86400)
-            try
-                exec "lvimgrepadd /{" . _date . "}/j %"
-            catch /^Vim(\a\+):E480:/
-            endtry
-        endfor
-    endif
-    exec "lw"
-endfunction
-"1}}}
-" ShowDueTasks command definitions {{{1
-command -buffer Today :call s:ShowDueTasks(0)
-command -buffer Tomorrow :call s:ShowDueTasks(1)
-command -buffer Week :call s:ShowDueTasks(0,7)
-command -buffer Overdue :call s:ShowDueTasks(-7,-1)
-
-if !hasmapto(':Today')
-    map <buffer> <unique> <LocalLeader>cd :Today<CR>
-endif
-if !hasmapto(':Tomorrow')
-    map <buffer> <unique> <LocalLeader>cf :Tomorrow<CR>
-endif
-if !hasmapto(':Week')
-    map <buffer> <unique> <LocalLeader>cw :Week<CR>
-endif
-if !hasmapto(':Overdue')
-    map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
-endif
-"1}}}
 " s:TaskSearch {{{1
 " daterange should be a list - [start, end] where start, end are numbers
 " relative to today (0 = today, 1 = tomorrow, -1 = yesterday, -7 = this time
@@ -532,11 +507,21 @@ function! s:TaskSearch(daterange, ...)
                     \"%Y%m%d", localtime() + a:daterange[1] * 86400))
     endif
     " Use vimgrep to find any task header lines
-    try
-        " TODO - make this support multiple files
-        lvimgrep /^\s*[A-Z]\+\s/j %
-    catch /^Vim(\a\+):E480:/
-    endtry
+    if exists("g:todo_files")
+        " Clear any existing list - we're using vimgrepadd
+        call setloclist(0, [])
+        for f in g:todo_files
+            try
+                exe 'lvimgrepadd /^\s*[A-Z]\+\s/j '.f
+            catch /^Vim(\a\+):E480:/
+            endtry
+        endfor
+    else
+        try
+            lvimgrep /^\s*[A-Z]\+\s/j %
+        catch /^Vim(\a\+):E480:/
+        endtry
+    endif
     let results = []
     " Now filter these
     for d in getloclist(0)
@@ -566,6 +551,35 @@ function! s:TaskSearch(daterange, ...)
     lw
 endfunction
 " 1}}}
+" s:ShowDueTasks {{{1
+function! s:ShowDueTasks(start, end)
+    " Start/end are number of days relative to today
+    " 0 == today, 1 == tomorrow, -1 == yesterday
+    " Make start/end the same number for a single say search
+    " Generate a regex to exclude all done states
+    let donere = '^\s*\('.join(s:GetDoneStates(), '\|').'\)\@!'
+    call s:TaskSearch([a:start, a:end], donere)
+endfunction
+"1}}}
+" ShowDueTasks command definitions {{{1
+command -buffer Today :call s:ShowDueTasks(0,0)
+command -buffer Tomorrow :call s:ShowDueTasks(1,1)
+command -buffer Week :call s:ShowDueTasks(0,7)
+command -buffer Overdue :call s:ShowDueTasks(-365,-1)
+
+if !hasmapto(':Today')
+    map <buffer> <unique> <LocalLeader>cd :Today<CR>
+endif
+if !hasmapto(':Tomorrow')
+    map <buffer> <unique> <LocalLeader>cf :Tomorrow<CR>
+endif
+if !hasmapto(':Week')
+    map <buffer> <unique> <LocalLeader>cw :Week<CR>
+endif
+if !hasmapto(':Overdue')
+    map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
+endif
+"1}}}
 
 " Task reorganizing
 " s:ArchiveDone {{{1
