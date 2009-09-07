@@ -16,7 +16,10 @@ let day4=strftime("%Y-%m-%d", localtime() + 86400 * 4)
 let day7=strftime("%Y-%m-%d", localtime() + 86400 * 7)
 let day8=strftime("%Y-%m-%d", localtime() + 86400 * 8)
 
-unlet g:todo_files " We want to test current file only
+if exists("g:todo_files")
+    unlet g:todo_files " We want to test current file only
+endif
+
 call append('$', 'TODO '.today.' Last Month {'.lastmonth.'}')
 call append('$', 'TODO '.today.' Last Week {'.lastweek.'}')
 call append('$', 'TODO '.today.' Yesterday {'.yesterday.'}')
