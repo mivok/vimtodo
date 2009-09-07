@@ -220,8 +220,8 @@ function! s:LoadFileVars()
                 for part in parts
                     let [k,v] = split(part, ':')
                     " Strip spaces
-                    let k = matchstr(k, '^\s*\(.*\S\)\s*$')
-                    let v = matchstr(v, '^\s*\(.*\S\)\s*$')
+                    let k = matchlist(k, '^\s*\(.*\S\)\s*$')[1]
+                    let v = matchlist(v, '^\s*\(.*\S\)\s*$')[1]
                     exe "let" s:PropertyVars[name]."[k]=v"
                 endfor
             elseif type == "nestedlist"
