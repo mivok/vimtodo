@@ -1,15 +1,8 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Test checkboxes
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Use TAP
-call vimtest#StartTap()
+source setup_tests.inc
 call vimtap#Plan(13)
-
-" Load the todo plugin
-" This should have the same effect as set ft=todo
-source ../ftplugin/todo.vim
-source ../syntax/todo.vim
 
 call vimtap#Diag("Normal checkbox")
 insert

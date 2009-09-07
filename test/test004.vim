@@ -1,11 +1,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Test in file settings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Use TAP
-call vimtest#StartTap()
-call vimtap#Plan(8)
-
 " We create the settings entries first because we are testing functionality
 " that occurs when the plugin is loaded
 insert
@@ -23,10 +18,8 @@ insert
     +BROWSER: firefox
 .
 
-" Load the todo plugin
-" This should have the same effect as set ft=todo
-source ../ftplugin/todo.vim
-source ../syntax/todo.vim
+source setup_tests.inc
+call vimtap#Plan(8)
 
 call vimtap#Is(g:todo_log_done, 0, "LOGDONE")
 call vimtap#Is(g:todo_log_drawer, "ALTERNATE", "LOGDRAWER")

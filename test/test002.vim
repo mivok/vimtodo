@@ -1,17 +1,8 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Test TODO state changes
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" Use TAP
-call vimtest#StartTap()
+source setup_tests.inc
 call vimtap#Plan(12)
-
-" Load the todo plugin
-" This should have the same effect as set ft=todo
-source ../ftplugin/todo.vim
-source ../syntax/todo.vim
-" Whitespace settings
-setlocal sw=4 sts=4 et
 
 " Regular expression to match a status timestamp
 let timestampre='\d\{4\}-\d\{2\}-\d\{2\} \d\{2\}:\d\{2\}:\d\{2\}'
