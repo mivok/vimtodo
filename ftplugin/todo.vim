@@ -278,9 +278,11 @@ exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
 " point dash
 function! s:InsertCheckbox()
     echo "Insert checkbox"
-    let oldpos=getpos(".")
-    s/^\(\s*\)\?\(- \)\?/\1[ ] /
-    call setpos(".", oldpos)
+    if match(getline('.'), '^\s*\[.\]') == -1
+        let oldpos=getpos(".")
+        s/^\(\s*\)\?\(- \)\?/\1[ ] /
+        call setpos(".", oldpos)
+    endif
 endfunction
 "1}}}
 " s:CheckboxToggle {{{1
