@@ -610,8 +610,14 @@ endfunction
 " 1}}}
 " s:ArchiveTask - Archives a range of lines {{{1
 function! s:ArchiveTask(startline, endline)
-    exe a:startline.",".a:endline."w! >>".
-                \fnamemodify(expand("%"),":p:h")."/".g:todo_done_file
+    if match(g:todo_done_file, '/') == 0 || match(g:todo_done_file, '~') == 0
+        " Absolute path, don't add the current dir
+        let filename=g:todo_done_file
+    else
+        " Non-absolute path
+        let filename=fnamemodify(expand("%"),":p:h")."/".g:todo_done_file
+    endif
+    exe a:startline.",".a:endline."w! >>".filename
     exe a:startline.",".a:endline."d"
 endfunction
 " 1}}}
