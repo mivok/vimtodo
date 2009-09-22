@@ -384,11 +384,11 @@ function! s:PromptTaskState()
                     \" :call <SID>SelectTaskState(\"".statekeys[key]."\"".
                     \",\"".oldstate."\",".idx.")<CR>"
     endfor
-    call append(line("$"), "    Press Space to remove any existing state")
-    exe "nnoremap <buffer> <silent> <Space> :call <SID>SelectTaskState(".
+    call append(line("$"), "    Press Backspace to remove any existing state")
+    exe "nnoremap <buffer> <silent> <BS> :call <SID>SelectTaskState(".
                 \'"","'.oldstate.'", '.idx.')<CR>'
-    call append(line("$"), "    Press Escape to cancel")
-    nnoremap <buffer> <silent> <Esc> :bd<CR>
+    call append(line("$"), "    Press Space to cancel")
+    nnoremap <buffer> <silent> <Space> :bd<CR>
     setlocal nomodifiable " Make the buffer read only
 endfunction
 "1}}}
