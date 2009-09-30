@@ -44,10 +44,53 @@ This is a todo entry. You can also add a new entry, with the 'cn' alias. In
 insert mode, type 'cn' and a new todo entry along with the current date will
 be added. You can also use <Leader>cn in normal mode to add a new entry.
 
-- What is in a task
-- Change Status <Leader>cs
-    - CLOSED, LOGBOOK entries
-- Task notes/subtasks
+The todo entry is made up of several parts:
+
+    TODO - the task status, this is something like TODO, DONE, WAITING
+    2009-09-01 - the task creation date
+    @computer - the context of the task, in this case, something to do at the
+                computer
+    +learnvim - the project the task is associated with
+
+Giving multiple tasks a context or project tag allows you to filter out just
+the tasks you are interested in using the filter function (described later).
+
+For now, press escape to go back to normal mode, make sure the cursor is on
+the same line at the todo entry you just added, and press <Leader>cs (\cs by
+default). The task status will change to 'DONE' and the line will be
+greyed out. Here, several things have happened:
+
+    - The task status changed from TODO to DONE
+    - The entire task changes color to show that the task is complete
+    - A CLOSED: line has been added underneath showing the date and time that
+      the task was closed.
+    - A logbook entry has been added (but is currently hidden), logging the
+      time and date of the task state change.
+
+A CLOSED: entry is added whenever a task is closed, and will be removed
+if a task is re-opened.
+
+Logbook entries however, log the date and time every time you change the state
+of a task, and look like this: >
+
+    :LOGBOOK:
+        TODO: 2009-09-30 18:19:51
+        CANCELLED: 2009-09-30 18:19:50
+        DONE: 2009-09-30 18:12:58
+
+Currently the todo entry is folded, so move the cursor to the fold line (just
+below the todo entry) and press zO to open all the folds. Then move the cursor
+back to the todo line and press <Leader>cs to change the task status a few
+times to see the behavior of the closed/logbook lines.
+
+If desired, the display of closed/logbook lines can be turned off in your
+.vimrc. See the configuration section for more details.
+
+You can add more information to a task using normal text editing commands.
+Anything that is indented is considered to be information that is part of a
+todo entry. For example, the closed and logbook lines are indented and
+considered part of the todo entry.
+
 - Due date
     - filtering
 - More filtering - context/project
@@ -106,6 +149,11 @@ FOLDING
     - This is mostly vim folding based on indentation level
     - Mention some basics
 
+==============================================================================
+CONFIGURATION
+    - Reference all the config options
+    - vimrc
+    - in file
 ==============================================================================
   vim:ft=help:tw=78
 
