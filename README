@@ -1,0 +1,14 @@
+Installation instructions
+-------------------------
+
+Option 1 - Vimball: Load vimtodo.vba with vim and source the file:
+
+    $ vim vimtodo.vba
+    :so %
+
+Option 2 - Using pathogen (www.vim.org/scripts/script.php?script_id=2332):
+
+    Untar/clone to ~/.vim/bundle/vimtodo/
+
+Once installed, use :help vimtodo for more documentation, or see the
+doc/todo.txt file.
