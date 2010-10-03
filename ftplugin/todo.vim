@@ -183,7 +183,11 @@ function! s:GetNextProperty(drawerline, propertyline)
     endif
     let match = matchlist(getline(a:propertyline),
                 \'^\s\++\([A-Z]\+\):\s\?\(.*\)$')
-    return match[1:2]
+    if match != []
+        return match[1:2]
+    else
+        return ["",""]
+    endif
 endfunction
 " 1}}}
 
