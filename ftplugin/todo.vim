@@ -580,6 +580,9 @@ if !hasmapto(':Overdue')
     map <buffer> <unique> <LocalLeader>cx :Overdue<CR>
 endif
 "1}}}
+" Task filter command definitions {{{1
+command -buffer -nargs=+ Filter :call s:TaskSearch([], <q-args>)
+"1}}}
 
 " Task reorganizing
 " s:ArchiveDone {{{1
