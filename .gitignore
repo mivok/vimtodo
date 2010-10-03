@@ -3,3 +3,4 @@ vimtodo.vba
 test/*.msgout
 test/*.out
 test/*.tap
+doc/tags
