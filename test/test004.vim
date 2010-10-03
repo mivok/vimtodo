@@ -22,7 +22,7 @@ source setup_tests.inc
 call vimtap#Plan(8)
 
 call vimtap#Is(g:todo_log_done, 0, "LOGDONE")
-call vimtap#Is(g:todo_log_drawer, "ALTERNATE", "LOGDRAWER")
+call vimtap#Is(g:todo_log_into_drawer, "ALTERNATE", "LOGDRAWER")
 call vimtap#Is(g:todo_done_file, "done2.txt", "DONEFILE")
 call vimtap#Is(g:todo_states, [["TODO", "INPROGRESS", "|", "DONE"],
             \["WAITING(w)", "FOO(f)", "|", "BAR(b)"]], "STATES")

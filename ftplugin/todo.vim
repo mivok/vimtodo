@@ -1,6 +1,6 @@
 " Vim filetype plugin for heirarchical TODO lists
 " Maintainer:   Mark Harrison <mark@mivok.net>
-" Last Change:  Aug 15, 2009
+" Last Change:  Oct 2, 2010
 " License:      ISC - See LICENSE file for details
 
 " This file has folded functions - Use zR to show all source code if you
@@ -202,7 +202,7 @@ call s:Set("g:todo_done_file", "done.txt")
 " Per file variables {{{1
 let s:PropertyVars = {
             \'LOGDONE':         'g:todo_log_done',
-            \'LOGDRAWER':       'g:todo_log_drawer',
+            \'LOGDRAWER':       'g:todo_log_into_drawer',
             \'DONEFILE':        'g:todo_done_file',
             \'STATES':          'g:todo_states',
             \'STATECOLORS':     'g:todo_state_colors',
