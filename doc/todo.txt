@@ -375,4 +375,14 @@ g:todo_browser                      (property: +BROWSER)
     Default: blank (any commands that require this will have no effect)
 
 ==============================================================================
+REPORTING BUGS AND FEATURE REQUESTS                             *vimtodo-bugs*
+
+Vimtodo uses github for bug tracking. Go to
+http://github.com/mivok/vimtodo/issues to report any issues.
+
+The latest version of the script is always available on github:
+
+http://github.com/mivok/vimtodo
+
+==============================================================================
   vim:ft=help:tw=78
