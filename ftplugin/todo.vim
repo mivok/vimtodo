@@ -3,6 +3,9 @@
 " Last Change:  Aug 15, 2009
 " License:      ISC - See LICENSE file for details
 
+" This file has folded functions - Use zR to show all source code if you
+" aren't familiar with folding in vim.
+
 " Only load if we haven't already {{{1
 if exists("b:did_ftplugin")
     finish
