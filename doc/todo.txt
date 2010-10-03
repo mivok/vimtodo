@@ -15,14 +15,9 @@ system, taking several ideas from Emacs' org-mode (http://www.orgmode.org/).
 ==============================================================================
 INSTALLATION                                            *vimtodo-installation*
 
-Vimtodo is distributed as a |vimball| package. To install it, to the
-following: >
-    vim vimtodo.vba
-    :so %
-    :q
-
-This will install the plugin in your ~/.vim directory, or a different
-directory if you have configured vim to install plugins elsewhere.
+Untar the archive to ~/.vim. If you wish, untar to a temporary directory, and
+copy the contents of the doc/, ftplugin/ and syntax/ directories to the
+respective directories in your ~/.vim directory.
 
 Alternatively, if you have pathogen installed, untar the entire archive to
 ~/.vim/bundle/vimtodo/.
