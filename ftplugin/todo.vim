@@ -152,7 +152,7 @@ function! s:FindOrMakeDrawer(name, line)
     let topindent = indent(".")
     let indent = indent(line(".") + 1)
     if indent <= topindent
-        let indent = topindent + 4 " TODO - set this to shiftwidth
+        let indent = topindent + &shiftwidth
     endif
     let indentstr=printf("%".indent."s", "") " generate indent spaces
     call append(line("."), indentstr.":".toupper(a:name).":")
@@ -409,7 +409,8 @@ function! s:SetTaskState(state, oldstate, idx)
         if log != "" " Don't log removing a state
             let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer, ".")
             call append(drawerline,
-                        \ matchstr(getline(drawerline), "^\\s\\+")."    ".
+                        \ matchstr(getline(drawerline), "^\\s\\+").
+                        \repeat(" ", &shiftwidth).
                         \log.": ".strftime("%Y-%m-%d %H:%M:%S"))
         endif
     endif
@@ -418,7 +419,8 @@ function! s:SetTaskState(state, oldstate, idx)
         let nextline = line(".") + 1
         let closedregex = '^\s\+CLOSED:'
         if s:IsDoneState(a:state)
-            let closedstr = matchstr(getline("."), "^\\s\\+")."    ".
+            let closedstr = matchstr(getline("."), "^\\s\\+").
+                        \ repeat(" ",&shiftwidth).
                         \ "CLOSED: ".strftime("%Y-%m-%d %H:%M:%S")
             " Set the CLOSED: status line
             if getline(nextline) !~ closedregex
