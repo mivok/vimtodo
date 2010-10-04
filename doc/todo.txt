@@ -16,8 +16,8 @@ system, taking several ideas from Emacs' org-mode (http://www.orgmode.org/).
 INSTALLATION                                            *vimtodo-installation*
 
 Untar the archive to ~/.vim. If you wish, untar to a temporary directory, and
-copy the contents of the doc/, ftplugin/ and syntax/ directories to the
-respective directories in your ~/.vim directory.
+copy the contents of the autoload/, doc/, ftplugin/ and syntax/ directories to
+the respective directories in your ~/.vim directory.
 
 Alternatively, if you have pathogen installed, untar the entire archive to
 ~/.vim/bundle/vimtodo/.

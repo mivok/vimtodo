@@ -18,13 +18,6 @@ set cpo&vim
 "1}}}
 
 " Utility Functions
-" s:Set - setup script variables {{{1
-function! s:Set(varname, value)
-    if !exists(a:varname)
-        exec "let" a:varname "=" string(a:value)
-    endif
-endfunction
-"1}}}
 " s:Map - mapping helper function {{{1
 function! s:Map(keys, funcname)
     if !hasmapto('<Plug>Todo'.a:funcname)
@@ -61,13 +54,6 @@ function! s:NewScratchBuffer(name, split)
     setlocal nowrap     " This can be changed if needed
 endfunction
 "1}}}
-" TodoParseTaskState - Parse TODO(t) into state and shortcut key {{{1
-function! TodoParseTaskState(state)
-    let state=matchstr(a:state, '^[A-Z]\+')
-    let key=matchstr(a:state, '\(^[A-Z]\+(\)\@<=[a-zA-Z0-9]\()\)\@=')
-    return { "state": state, "key": key }
-endfunction
-"1}}}
 " s:GetState - Gets the state for a line, and its index {{{1
 function! s:GetState(line)
     let line=getline(a:line)
@@ -89,7 +75,7 @@ function! s:IsDoneState(state)
         " Note, having idx set to -1 (when there is no |) means we will be
         " looking at the last item, which is the desired behavior.
         for teststate in group[idx+0:]
-            if TodoParseTaskState(teststate)["state"] == a:state
+            if vimtodo#TodoParseTaskState(teststate)["state"] == a:state
                 return 1
             endif
         endfor
@@ -108,7 +94,7 @@ function! s:GetDoneStates()
             let idx = idx + 1
         endif
         for state in group[idx :]
-            call add(states, TodoParseTaskState(state)['state'])
+            call add(states, vimtodo#TodoParseTaskState(state)['state'])
         endfor
     endfor
     return states
@@ -192,16 +178,8 @@ endfunction
 " 1}}}
 
 " Settings
-" Default variables {{{1
-call s:Set("g:todo_states",
-    \[["TODO(t)", "|", "DONE(d)", "CANCELLED(c)"], ["WAITING(w)", "CLOSED(l)"]])
-call s:Set("g:todo_state_colors", { "TODO" : "Blue", "DONE": "Green",
-    \ "CANCELLED" : "Red", "WAITING": "Yellow", "CLOSED": "Grey" })
-call s:Set("g:todo_checkbox_states", [[" ", "X"], ["+", "-", "."],
-    \["Y", "N", "?"]])
-call s:Set("g:todo_log_done", 1)
-call s:Set("g:todo_log_into_drawer", "LOGBOOK")
-call s:Set("g:todo_done_file", "done.txt")
+" Load default variables {{{1
+call vimtodo#SetDefaultVars()
 "1}}}
 " Per file variables {{{1
 let s:PropertyVars = {
@@ -293,8 +271,8 @@ call s:Map("ca", "ArchiveDone")
 " ds - Datestamp {{{1
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " cn, \cn - New todo entry {{{1
-exe 'map \cn o'.TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
-exe 'iab cn '.TodoParseTaskState(g:todo_states[0][0])["state"].
+exe 'map \cn o'.vimtodo#TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
+exe 'iab cn '.vimtodo#TodoParseTaskState(g:todo_states[0][0])["state"].
             \' <C-R>=strftime("%Y-%m-%d")<CR>'
 "1}}}
 
@@ -346,14 +324,16 @@ function! s:NextTaskState()
         for group in g:todo_states
             let stateidx = 0
             while stateidx < len(group)
-                let teststate = TodoParseTaskState(group[stateidx])["state"]
+                let teststate = vimtodo#TodoParseTaskState(group[stateidx]
+                    \)["state"]
                 if teststate == oldstate
                     let stateidx=(stateidx + 1) % len(group)
                     " Skip | separator
                     if group[stateidx] == "|"
                         let stateidx=(stateidx + 1) % len(group)
                     endif
-                    let val=TodoParseTaskState(group[stateidx])["state"]
+                    let val=vimtodo#TodoParseTaskState(
+                        \group[stateidx])["state"]
                     call s:SetTaskState(val, oldstate, idx)
                     return
                 endif
@@ -375,7 +355,7 @@ function! s:PromptTaskState()
             if statestr == "|"
                 continue
             endif
-            let state = TodoParseTaskState(statestr)
+            let state = vimtodo#TodoParseTaskState(statestr)
             if state["key"] != ""
                 call add(promptlist, state["state"]." (".state["key"].")")
                 let statekeys[state["key"]] = state["state"]

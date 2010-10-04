@@ -2,6 +2,9 @@
 " Use TAP
 call vimtest#StartTap()
 
+" Set the autoload path
+set rtp+=..
+
 " Load the todo plugin
 " This should have the same effect as set ft=todo
 source ../ftplugin/todo.vim

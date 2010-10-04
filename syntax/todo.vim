@@ -10,6 +10,9 @@ if exists("b:current_syntax")
   finish
 endif
 
+" Load default variables if not already set
+call vimtodo#SetDefaultVars()
+
 syn match       todoProject     /+\S\+/
 syn match       todoContext     /\s@\S\+/
 syn match       todoPriority    /([A-Z])/
@@ -68,7 +71,7 @@ function! s:HighlightDone()
         endif
         let parsed = []
         for state in group[idx+0:]
-            call add(parsed, TodoParseTaskState(state)["state"])
+            call add(parsed, vimtodo#TodoParseTaskState(state)["state"])
         endfor
         let match = join(parsed, "\\|")
         exec "syn region todoDone start=\"^\\z(\\s*\\)\\%(".match."\\)\\s\"".
