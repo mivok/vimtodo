@@ -40,7 +40,7 @@ the following line into the file: >
 
 This is a todo entry. You can also add a new entry, with the 'cn' alias. In
 insert mode, type 'cn' and a new todo entry along with the current date will
-be added. You can also use <Leader>cn in normal mode to add a new entry.
+be added. You can also use <LocalLeader>cn in normal mode to add a new entry.
 
 The todo entry is made up of several parts:
 
@@ -54,9 +54,9 @@ Giving multiple tasks a context or project tag allows you to filter out just
 the tasks you are interested in using the filter function (described later).
 
 For now, press escape to go back to normal mode, make sure the cursor is on
-the same line at the todo entry you just added, and press <Leader>cs (\cs by
-default). The task status will change to 'DONE' and the line will be
-greyed out. Here, several things have happened:
+the same line at the todo entry you just added, and press <LocalLeader>cs (\cs
+by default). The task status will change to 'DONE' and the line will be greyed
+out. Here, several things have happened:
 
     - The task status changed from TODO to DONE
     - The entire task changes color to show that the task is complete
@@ -78,8 +78,8 @@ of a task, and look like this: >
 
 Currently the todo entry is folded, so move the cursor to the fold line (just
 below the todo entry) and press zO to open all the folds. Then move the cursor
-back to the todo line and press <Leader>cs to change the task status a few
-times to see the behavior of the closed/logbook lines.
+back to the todo line and press <LocalLeader>cs to change the task status a
+few times to see the behavior of the closed/logbook lines.
 
 If desired, the display of closed/logbook lines can be turned off in your
 .vimrc. See the configuration section for more details.
@@ -97,16 +97,16 @@ example {ds} will set a deadline of today.
 If you have tasks with due dates, you can use several commands to view tasks
 that are due soon:
 
-    <Leader>cd - Show tasks due today
-    <Leader>cf - Show tasks due tomorrow
-    <Leader>cw - Show tasks due within 7 days
-    <Leader>cx - Show overdue tasks (tasks that were due sometime in the past
+    <LocalLeader>cd - Show tasks due today
+    <LocalLeader>cf - Show tasks due tomorrow
+    <LocalLeader>cw - Show tasks due within 7 days
+    <LocalLeader>cx - Show overdue tasks (tasks that were due sometime in the past
                  year)
 
 Each of these opens up another buffer listing the matching entries. Pressing
 enter on one of the items in the list will take you to the corresponding
 entry. Try this - change the deadline for your task to today, and type
-<Leader>cd.
+<LocalLeader>cd.
 
 You can filter on other criteria too, such as context or project using the
 :Filter ex command. It takes a regular expression and will show matching
@@ -123,13 +123,13 @@ The first word of a task in all caps shows the tasks state. Normally it is is
 something like TODO or DONE, but the available states can be configured as
 needed.
 
-Task states can be changed in one of two ways: The <Leader>cs normal mode
-command, and the <Leader>cv normal mode command.
+Task states can be changed in one of two ways: The <LocalLeader>cs normal mode
+command, and the <LocalLeader>cv normal mode command.
 
-<Leader>cs will cycle through the task states (by default, TODO, DONE,
+<LocalLeader>cs will cycle through the task states (by default, TODO, DONE,
 CANCELLED) See |vimtodo-statprogression| for more information on this.
 
-<Leader>cv will bring up a prompt asking you to pick which state you want to
+<LocalLeader>cv will bring up a prompt asking you to pick which state you want to
 switch to. Press the letter associated with the state to immediately change
 the task to that state.
 
@@ -148,7 +148,7 @@ See |vimtodo-config| for more information on these settings.
 
 STATE PROGRESSION *vimtodo-stateprogression*
 
-When using <Leader>cs to change between task states, the state will cycle
+When using <LocalLeader>cs to change between task states, the state will cycle
 between succesive states in the progression, and back to the beginning if the
 final state is reached. The progression can be configured, but the default
 states are:
@@ -157,16 +157,16 @@ TODO -> DONE -> CANCELLED
 WAITING -> CLOSED
 
 If you wish to change to a state that is on a different progression (e.g. from
-TODO to WAITING), then you can use the <Leader>cv command to jump direct to
-that state.
+TODO to WAITING), then you can use the <LocalLeader>cv command to jump direct
+to that state.
 
 ==============================================================================
 ARCHIVING                               *vimtodo-archive* *vimtodo-archiving*
 
 VimTODO can move all completed tasks to another file to reduce clutter. The
-<Leader>ca command is used for this. Any task that has been closed will be
-moved to the done file, which by default is 'done.txt' in the same directory
-as the todo file.
+<LocalLeader>ca command is used for this. Any task that has been closed will
+be moved to the done file, which by default is 'done.txt' in the same
+directory as the todo file.
 
 The name of the done file can be changed using the g:todo_done_file .vimrc
 setting or on a per-file basis using the DONEFILE property.
@@ -180,14 +180,15 @@ and in fact it probably isn't a good idea to mix task entries (with a state)
 and checkboxes.
 
 To create a checkbox, simply type [ ] in insert mode. Alternatively, you can
-use <Leader>cn in normal mode to add a checkbox to the beginning of a line.
-Note that if you do this on the header line for a task, it will be inserted
-before the task state (e.g. TODO) and the task will lose any special meaning.
+use <LocalLeader>cn in normal mode to add a checkbox to the beginning of a
+line.  Note that if you do this on the header line for a task, it will be
+inserted before the task state (e.g. TODO) and the task will lose any special
+meaning.
 
-To toggle a checkbox, use the <Leader>cc command. By default, a checkbox will
-be checked with an X, and another use of <Leader>cc will uncheck the box.
-However, like task states, there are a number of states a checkbox can cycle
-through: >
+To toggle a checkbox, use the <LocalLeader>cc command. By default, a checkbox
+will be checked with an X, and another use of <LocalLeader>cc will uncheck the
+box.  However, like task states, there are a number of states a checkbox can
+cycle through: >
 
     [ ] -> [X]
     [+] -> [-] -> [.]
@@ -205,7 +206,7 @@ behavior.
 TASK LINKS                              *vimtodo-tasklinks* *vimtodo-links*
 
 Vimtodo can be configured to reference an external task management system. By
-adding tidXXXX to your task, you can use <Leader>ct to open up a web page
+adding tidXXXX to your task, you can use <LocalLeader>ct to open up a web page
 showing the external task.
 
 For example:
@@ -224,11 +225,11 @@ using Linux/Gnome): >
       let g:todo_browser="gnome-open"
 
 You wish to reference this ticket in a TODO entry, so you add tid12345
-to the ticket. At this point, <Leader>ct will open up your web browser and
-take you to the referenced ticket.
+to the ticket. At this point, <LocalLeader>ct will open up your web browser
+and take you to the referenced ticket.
 
 Vimtodo can also open any URL in a web browser if the g:todo_browser variable
-is configured. To do this, use <Leader>cl and any http/https link on the
+is configured. To do this, use <LocalLeader>cl and any http/https link on the
 current line will be opened in the web browser.
 
 ==============================================================================
@@ -309,7 +310,7 @@ g:todo_states                       (property: +STATES)
     states, put '|' as the first entry in the list.
 
     Each state should be in all caps (e.g. TODO). An optional shortcut key
-    (for use with <Leader>cv) can be added in parentheses after the state
+    (for use with <LocalLeader>cv) can be added in parentheses after the state
     (e.g. "TODO(t)").
 
     To set the colors for each state, see the g:todo_state_colors option.
@@ -359,9 +360,9 @@ g:todo_taskurl                      (property: +TASKURL)
     format in an entry.
 
     Any occurence of %s in the URL will be replaced with the id of the ticket
-    when <Leader>ct is used.
+    when <LocalLeader>ct is used.
 
-    Default: blank (<Leader>ct does nothing)
+    Default: blank (<LocalLeader>ct does nothing)
 
 g:todo_browser                      (property: +BROWSER)
 

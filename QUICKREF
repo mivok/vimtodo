@@ -14,24 +14,24 @@ Todo entry components
 Commands
 ========
 
-<Leader> means the vim leader command, by default it is backslash ('\')
+<LocalLeader> means the vim leader command, by default it is backslash ('\')
 
-    <Leader>cn - New TODO entry
-    <Leader>cs - Cycle task status
-    <Leader>cv - Choose task status
+    <LocalLeader>cn - New TODO entry
+    <LocalLeader>cs - Cycle task status
+    <LocalLeader>cv - Choose task status
 
-    <Leader>cb - Add a checkbox
+    <LocalLeader>cb - Add a checkbox
     <Leaver>cc - Toggle checkbox
 
-    <Leader>ct - Load a task link
-    <Leader>cl - Load a http link
+    <LocalLeader>ct - Load a task link
+    <LocalLeader>cl - Load a http link
 
-    <Leader>ca - Archive all done tasks
+    <LocalLeader>ca - Archive all done tasks
 
-    <Leader>cd - Show tasks due today (ex command: :Today)
-    <Leader>cf - Show tasks due tomorrow (ex command: :Tomorrow)
-    <Leader>cw - Show tasks due within 7 days (ex command: :Week)
-    <Leader>cx - Show overdue tasks (ex command: :Overdue)
+    <LocalLeader>cd - Show tasks due today (ex command: :Today)
+    <LocalLeader>cf - Show tasks due tomorrow (ex command: :Tomorrow)
+    <LocalLeader>cw - Show tasks due within 7 days (ex command: :Week)
+    <LocalLeader>cx - Show overdue tasks (ex command: :Overdue)
 
     :Filter    - Search for tasks matching regex
 

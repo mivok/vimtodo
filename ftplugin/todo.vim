@@ -271,7 +271,8 @@ call s:Map("ca", "ArchiveDone")
 " ds - Datestamp {{{1
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " cn, \cn - New todo entry {{{1
-exe 'map \cn o'.vimtodo#TodoParseTaskState(g:todo_states[0][0])["state"].' ds '
+exe 'map <LocalLeader>cn o'.vimtodo#TodoParseTaskState(
+            \g:todo_states[0][0])["state"].' ds '
 exe 'iab cn '.vimtodo#TodoParseTaskState(g:todo_states[0][0])["state"].
             \' <C-R>=strftime("%Y-%m-%d")<CR>'
 "1}}}
