@@ -376,6 +376,16 @@ g:todo_browser                      (property: +BROWSER)
     Default: blank (any commands that require this will have no effect)
 
 ==============================================================================
+TROUBLESHOOTING                                     *vimtodo-troubleshooting*
+
+When I load a todo file (or set ft=todo), the syntax coloring shows up, but
+none of the commands seem to work.
+
+    Make sure you have filetype plugins enabled in your vim config. This can
+    be done by adding 'filetype plugin on' to your .vimrc file. See
+    |:filetype-plugin-on| for more details.
+
+==============================================================================
 REPORTING BUGS AND FEATURE REQUESTS                             *vimtodo-bugs*
 
 Vimtodo uses github for bug tracking. Go to
