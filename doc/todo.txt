@@ -127,7 +127,7 @@ Task states can be changed in one of two ways: The <LocalLeader>cs normal mode
 command, and the <LocalLeader>cv normal mode command.
 
 <LocalLeader>cs will cycle through the task states (by default, TODO, DONE,
-CANCELLED) See |vimtodo-statprogression| for more information on this.
+CANCELLED) See |vimtodo-stateprogression| for more information on this.
 
 <LocalLeader>cv will bring up a prompt asking you to pick which state you want to
 switch to. Press the letter associated with the state to immediately change
@@ -146,7 +146,7 @@ The closed/logbook behavior can be configured in your .vimrc using the
 this behavior on a per file basis using the LOGDONE and LOGDRAWER properties.
 See |vimtodo-config| for more information on these settings.
 
-STATE PROGRESSION *vimtodo-stateprogression*
+STATE PROGRESSION                                   *vimtodo-stateprogression*
 
 When using <LocalLeader>cs to change between task states, the state will cycle
 between succesive states in the progression, and back to the beginning if the
