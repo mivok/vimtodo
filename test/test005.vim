@@ -2,7 +2,7 @@
 " Test todo entry filtering
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 source setup_tests.inc
-call vimtap#Plan(8)
+call vimtap#Plan(9)
 
 " Get Today's date for matching with the auto-generated dates
 let lastmonth=strftime("%Y-%m-%d", localtime() - 86400 * 30)
@@ -104,5 +104,14 @@ Overdue
 close
 let resultscmd = s:processResults()
 call vimtap#Is(results, resultscmd, "Overdue (command version)")
+
+" Standard filter command - Note that filter includes DONE tasks
+Filter Month
+close
+let results = s:processResults()
+call vimtap#Is(results, [
+            \'TODO '.today.' Last Month {'.lastmonth.'}',
+            \'DONE '.today.' Last Month {'.lastmonth.'}'
+            \], "Filter")
 
 call vimtest#Quit()
