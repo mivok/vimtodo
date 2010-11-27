@@ -463,7 +463,7 @@ function! s:LoadTaskLink()
     if tid != ""
         let tid = matchstr(tid, "\\d\\+")
         let taskurl = substitute(g:todo_taskurl, "%s", tid, "")
-        call system(g:todo_browser . " " . taskurl)
+        call system(shellescape(g:todo_browser) . " " . taskurl)
         echo "Loading Task"
     else
         echo "No Task ID found"
@@ -475,7 +475,7 @@ endfunction
 function! s:LoadLink()
     let url=matchstr(getline("."), "https\\?://\\S\\+")
     if url != ""
-        call system(g:todo_browser . " " . url)
+        call system(shellescape(g:todo_browser) . " " . url)
         echo "Loading URL"
     else
         echo "No URL Found"
