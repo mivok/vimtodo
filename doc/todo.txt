@@ -233,7 +233,7 @@ is configured. To do this, use <LocalLeader>cl and any http/https link on the
 current line will be opened in the web browser.
 
 ==============================================================================
-FOLDING
+FOLDING                                                     *vimtodo-folding*
 
 Any extra data added to an entry (be it the logbook/closed tags, or notes on a
 task) is indented from the first line, and is folded away when the file is
