@@ -1,6 +1,6 @@
 " Vim filetype plugin for heirarchical TODO lists
 " Maintainer:   Mark Harrison <mark@mivok.net>
-" Last Change:  Oct 2, 2010
+" Last Change:  Nov 27, 2010
 " License:      ISC - See LICENSE file for details
 
 " This file has folded functions - Use zR to show all source code if you
@@ -149,14 +149,14 @@ function! s:FindOrMakeDrawer(name, line)
     if line != -1
         return line
     endif
-    let topindent = indent(".")
-    let indent = indent(line(".") + 1)
+    let topindent = indent(a:line)
+    let indent = indent(a:line + 1)
     if indent <= topindent
         let indent = topindent + &shiftwidth
     endif
     let indentstr=printf("%".indent."s", "") " generate indent spaces
-    call append(line("."), indentstr.":".toupper(a:name).":")
-    return line(".")+1
+    call append(a:line, indentstr.":".toupper(a:name).":")
+    return a:line + 1
 endfunction
 "1}}}
 " s:GetNextProperty {{{1
@@ -407,7 +407,8 @@ function! s:SetTaskState(state, oldstate, idx)
     if g:todo_log_into_drawer != ""
         let log=a:state
         if log != "" " Don't log removing a state
-            let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer, ".")
+            let drawerline = s:FindOrMakeDrawer(g:todo_log_into_drawer,
+                \line("."))
             call append(drawerline,
                         \ matchstr(getline(drawerline), "^\\s\\+").
                         \repeat(" ", &shiftwidth).
