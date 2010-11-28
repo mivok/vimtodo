@@ -246,6 +246,26 @@ basic commands used to open/close folds are |zo| and |zc| (both normal mode
 commands).
 
 ==============================================================================
+TIME SPENT ON TASKS                                     *vimtodo-timespent*
+
+Vimtodo has limited support for logging the time spent on tasks. For each
+subtask in a todo entry, you can add the time spent tag that looks something
+like: [1.5h] (for 1.5 hours spent on the task).
+
+Vimtodo can then total up the time spent on each subtask and display the total
+in the top level task. The command to update the totals is <LocalLeader>ce,
+which will create or update a TIMETOTAL property inside the INFO drawer on the
+top level task.
+
+In addition to the normal mode command, the ex command :UpdateTimeTotal is
+provided, which will allow you to automate the updating as desired. One option
+is to update the totals just before saving the file with an autocommand. The
+following example is something you could add in ~/.vim/after/ftplugin/todo.vim
+which would automatically update the times whenever a todo file is written: >
+
+    au BufWrite <buffer> :UpdateTimeTotal
+
+==============================================================================
 CONFIGURATION                       *vimtodo-config* *vimtodo-configuration*
 
 Much of vimtodo's behavior can be changed if desired. There are two options

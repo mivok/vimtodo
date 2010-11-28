@@ -318,6 +318,7 @@ call s:Map("cs", "NextTaskState")
 call s:Map("ct", "LoadTaskLink")
 call s:Map("cl", "LoadLink")
 call s:Map("ca", "ArchiveDone")
+call s:Map("ce", "UpdateTimeTotal")
 "1}}}
 
 " Todo entry macros
@@ -667,6 +668,38 @@ function! s:ArchiveTask(startline, endline)
     exe a:startline.",".a:endline."w! >>".filename
     exe a:startline.",".a:endline."d"
 endfunction
+" 1}}}
+
+" Automatically filled in fields
+" s:UpdateTimeTotal {{{1
+" Updates any total time values for the current task
+function! s:UpdateTimeTotal()
+    let time_re = '\[\([0-9.]\+\)h\]'
+    let totaltimes = {}
+    let linenum = 1
+    let oldfilelen = line("$")
+    while linenum <= line("$")
+        let m = matchlist(getline(linenum), time_re)
+        if m != []
+            let currtask = s:GetCurrentTask(linenum)
+            let drawerline = s:FindOrMakeDrawer("INFO", currtask[0])
+            let currtotal = get(totaltimes, drawerline, 0)
+            let totaltimes[drawerline] = currtotal + str2float(m[1])
+        endif
+        let linenum += 1
+        " Skip ahead if the file grew in length because we added a drawer
+        let linenum += (line("$") - oldfilelen)
+        let oldfilelen = line("$")
+    endwhile
+    " Update the drawers here (in reverse order as updating will likely change
+    " line numbers)
+    for drawer in reverse(sort(keys(totaltimes)))
+        call s:SetProperty(drawer, "TOTALTIME",
+            \printf("%.2f", totaltimes[drawer]))
+    endfor
+endfunction
+" Command definition
+command -buffer UpdateTimeTotal :call s:UpdateTimeTotal()
 " 1}}}
 
 " Restore the old compatible mode setting {{{1
