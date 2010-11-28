@@ -113,6 +113,25 @@ function! s:ParseDate(datestr)
     return str2nr(printf("%d%02d%02d", y,m,d))
 endfunction
 " 1}}}
+" s:GetCurrentTask {{{1
+" Gets the line numbers for the start and end of the current task given a line
+" number (the 'current' line).  A task for the purposes of this function
+" starts at the beginning of the line and stops when the indent goes back to 0
+function! s:GetCurrentTask(line)
+    let startline = a:line
+    let endline = a:line
+    let bottom = line("$")
+
+    while startline > 1 && indent(startline) > 0
+        let startline -= 1
+    endwhile
+    while endline < bottom && indent(endline + 1) > 0
+        let endline += 1
+    endwhile
+    return [startline, endline]
+endfunction
+" 1}}}
+
 " Drawer Functions
 " s:FindDrawer {{{1
 function! s:FindDrawer(name, line)
@@ -173,6 +192,40 @@ function! s:GetNextProperty(drawerline, propertyline)
         return match[1:2]
     else
         return ["",""]
+    endif
+endfunction
+" 1}}}
+" s:GetProperty {{{1
+function! s:GetProperty(drawerline, property)
+    let indent = indent(a:drawerline)
+    let linenum = a:drawerline + 1
+    while indent(linenum) >= indent
+        let match = matchlist(getline(linenum),
+                    \'^\s\++'.a:property.':\s\?\(.*\)$')
+        if match != []
+            return [match[1], linenum]
+        endif
+        let linenum += 1
+    endwhile
+    return ["", -1]
+endfunction
+" 1}}}
+" s:SetProperty {{{1
+function! s:SetProperty(drawerline, property, value)
+    let match = s:GetProperty(a:drawerline, a:property)
+    if match[1] != -1
+        " Property already exists, edit it
+        exe match[1] . "s/:.*/: " . a:value . "/"
+    else
+        " Property doesn't exist, add it from scratch
+        let topindent = indent(a:drawerline)
+        let indent = indent(a:drawerline + 1)
+        if indent <= topindent
+            let indent = topindent + &shiftwidth
+        endif
+        let indentstr=printf("%".indent."s", "") " generate indent spaces
+        call append(a:drawerline, indentstr."+".toupper(a:property).": " .
+            \ a:value)
     endif
 endfunction
 " 1}}}
