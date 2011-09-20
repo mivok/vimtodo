@@ -180,7 +180,7 @@ and in fact it probably isn't a good idea to mix task entries (with a state)
 and checkboxes.
 
 To create a checkbox, simply type [ ] in insert mode. Alternatively, you can
-use <LocalLeader>cn in normal mode to add a checkbox to the beginning of a
+use <LocalLeader>cb in normal mode to add a checkbox to the beginning of a
 line.  Note that if you do this on the header line for a task, it will be
 inserted before the task state (e.g. TODO) and the task will lose any special
 meaning.
