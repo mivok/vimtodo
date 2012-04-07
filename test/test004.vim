@@ -16,10 +16,20 @@ insert
     +CHECKBOXSTATES: 1 2 3
     +TASKURL: http://www.google.com/%s
     +BROWSER: firefox
+    +MYPROPERTY: somevalue
+    +MYPROPLIST: A B C
 .
 
+let g:todo_property_vars = {
+    \'MYPROPERTY': 'g:todo_myproperty',
+    \'MYPROPLIST': 'g:todo_myproplist'
+    \}
+let g:todo_property_types = {
+    \'MYPROPLIST': 'nestedlist'
+    \}
+
 source setup_tests.inc
-call vimtap#Plan(8)
+call vimtap#Plan(10)
 
 call vimtap#Is(g:todo_log_done, 0, "LOGDONE")
 call vimtap#Is(g:todo_log_into_drawer, "ALTERNATE", "LOGDRAWER")
@@ -32,5 +42,7 @@ call vimtap#Is(g:todo_checkbox_states, [["A", "B", "C"], ["1", "2", "3"]],
             \ "CHECKBOXSTATES")
 call vimtap#Is(g:todo_taskurl, "http://www.google.com/%s", "TASKURL")
 call vimtap#Is(g:todo_browser, "firefox", "BROWSER")
+call vimtap#Is(g:todo_myproperty, "somevalue", "MYPROPERTY")
+call vimtap#Is(g:todo_myproplist, [["A", "B", "C"]], "MYPROPLIST")
 
 call vimtest#Quit()

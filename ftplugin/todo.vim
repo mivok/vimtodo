@@ -250,6 +250,8 @@ let s:PropertyTypes = {
             \'STATECOLORS':     'dict',
             \'CHECKBOXSTATES':  'nestedlist'
             \}
+call extend(s:PropertyVars, g:todo_property_vars)
+call extend(s:PropertyTypes, g:todo_property_types)
 function! s:LoadFileVars()
     let drawerline=s:FindDrawer("SETTINGS", 0)
     if drawerline == -1
