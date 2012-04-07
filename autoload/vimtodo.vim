@@ -32,5 +32,7 @@ function! vimtodo#SetDefaultVars()
     call vimtodo#Set("g:todo_log_done", 1)
     call vimtodo#Set("g:todo_log_into_drawer", "LOGBOOK")
     call vimtodo#Set("g:todo_done_file", "done.txt")
+    call vimtodo#Set("g:todo_property_vars", {})
+    call vimtodo#Set("g:todo_property_types", {})
 endfunction
 "1}}}

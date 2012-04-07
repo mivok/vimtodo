@@ -395,6 +395,24 @@ g:todo_browser                      (property: +BROWSER)
 
     Default: blank (any commands that require this will have no effect)
 
+CUSTOM PROPERTIES                                   *vimtodo-customproperties*
+
+If you wish, you can define custom properties in the settings drawer to allow
+other configuration options to be set inside todo files. To do this, you can
+set the g:todo_property_vars, and optionally, the g:todo_property_types. For
+example: >
+
+    let g:todo_property_vars={
+        \'FOO': 'g:todo_foo'
+        \'BAR': 'g:todo_bar'
+        \}
+    let g:todo_property_types={
+        \'BAR': 'dict'
+        \}
+
+This is mostly a developer feature. You probably won't need it during normal
+use.
+
 ==============================================================================
 TROUBLESHOOTING                                     *vimtodo-troubleshooting*
 
