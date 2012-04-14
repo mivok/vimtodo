@@ -3,4 +3,6 @@ vimtodo.vba
 test/*.msgout
 test/*.out
 test/*.tap
+t/*.out
+t/*.dbg
 doc/tags
