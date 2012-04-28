@@ -36,3 +36,5 @@ More state changes
     ^        TODO: ${g:ts_re} re
     ^        CANCELLED: ${g:ts_re} re
     ^        DONE: ${g:ts_re} re
+
+vim: ft=vimcram

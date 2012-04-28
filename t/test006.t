@@ -27,3 +27,9 @@ Now check the contents of the archive file
     DONE 2009-09-08 Test entry 2
     CANCELLED 2009-09-08 Test entry 3
     CLOSED 2009-09-10 Test entry 5
+
+Clean up
+
+    :call delete("test006.archive")
+
+vim: ft=vimcram

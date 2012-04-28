@@ -14,3 +14,5 @@ TODO entry creation with \cn macro (note the trailing space)
 
     @\cn
     (3) TODO ${g:today} 
+
+vim: ft=vimcram

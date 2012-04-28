@@ -132,4 +132,8 @@ Standard filter command - Note that filter includes DONE tasks
     \ 'DONE '.g:today.' Last Month {'.g:lastmonth.'}'
     \ ]
 
+Clean up
+
+    :call delete("test005.txt")
+
 vim: ft=vimcram

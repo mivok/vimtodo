@@ -41,3 +41,5 @@ Compare variable values:
     ? g:todo_taskurl == "http://www.google.com/%s"
     ? g:todo_myproperty == "somevalue"
     ? g:todo_myproplist == [["A", "B", "C"]]
+
+vim: ft=vimcram
