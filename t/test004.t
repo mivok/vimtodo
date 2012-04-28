@@ -15,16 +15,8 @@ settings getting applied as the plugin is loaded.
     >     +CHECKBOXSTATES: 1 2 3
     >     +TASKURL: http://www.google.com/%s
     >     +BROWSER: firefox
-    >     +MYPROPERTY: somevalue
-    >     +MYPROPLIST: A B C
 
 Setup for tests:
-
-    :let g:todo_property_vars = {
-    \   'MYPROPERTY' : 'g:todo_myproperty',
-    \   'MYPROPLIST' : 'g:todo_myproplist',
-    \}
-    :let g:todo_property_types = {'MYPROPLIST': 'nestedlist'}
 
     :so test_setup.vim
 
@@ -39,7 +31,5 @@ Compare variable values:
     \ "INPROGRESS": "magenta", "FOO": "red" }
     ? g:todo_checkbox_states == [["A", "B", "C"], ["1", "2", "3"]]
     ? g:todo_taskurl == "http://www.google.com/%s"
-    ? g:todo_myproperty == "somevalue"
-    ? g:todo_myproplist == [["A", "B", "C"]]
 
 vim: ft=vimcram
