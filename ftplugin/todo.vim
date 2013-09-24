@@ -325,7 +325,7 @@ call s:Map("ce", "UpdateTimeTotal")
 " ds - Datestamp {{{1
 iab ds <C-R>=strftime("%Y-%m-%d")<CR>
 " cn, \cn - New todo entry {{{1
-exe 'map <LocalLeader>cn o'.vimtodo#TodoParseTaskState(
+exe 'map <LocalLeader>cn o<Esc>0Di'.vimtodo#TodoParseTaskState(
             \g:todo_states[0][0])["state"].' ds '
 exe 'iab cn '.vimtodo#TodoParseTaskState(g:todo_states[0][0])["state"].
             \' <C-R>=strftime("%Y-%m-%d")<CR>'
